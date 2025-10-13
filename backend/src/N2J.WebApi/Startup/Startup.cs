@@ -3,6 +3,7 @@ using N2J.Infrastructure;
 using N2J.Infrastructure.Persistence;
 using N2J.WebApi.Extensions;
 using N2J.WebApi.Middleware;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -42,13 +43,21 @@ public class Startup
             {
                 metrics.AddAspNetCoreInstrumentation()
                        .AddHttpClientInstrumentation()
-                       .AddRuntimeInstrumentation(); // This gives you basic system metrics
+                       .AddRuntimeInstrumentation() // This gives you basic system metrics
+                       .AddOtlpExporter(); // Export metrics via OTLP
             })
             .WithTracing(tracing =>
             {
                 tracing.AddAspNetCoreInstrumentation()
-                       .AddHttpClientInstrumentation();
+                       .AddHttpClientInstrumentation()
+                       .AddOtlpExporter(); // Export traces via OTLP
             });
+
+        // Also, add OpenTelemetry logging
+        _builder.Logging.AddOpenTelemetry(logging =>
+        {
+            logging.AddOtlpExporter();
+        });
     }
 
     private void ConfigureConfiguration()

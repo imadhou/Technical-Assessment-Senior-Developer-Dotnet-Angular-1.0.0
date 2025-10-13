@@ -15,14 +15,12 @@ public class RequestLoggingMiddleware
     {
         var startTime = DateTime.UtcNow;
 
-        _logger.LogInformation("HTTP {Method} {Path} started",
-            context.Request.Method, context.Request.Path);
+        _logger.LogInformation($"HTTP {context.Request.Method} {context.Request.Path} started");
 
         await _next(context);
 
         var elapsed = DateTime.UtcNow - startTime;
 
-        _logger.LogInformation("HTTP {Method} {Path} completed with {StatusCode} in {Elapsed}ms",
-            context.Request.Method, context.Request.Path, context.Response.StatusCode, elapsed.TotalMilliseconds);
+        _logger.LogInformation($"HTTP {context.Request.Method} {context.Request.Path} completed with {context.Response.StatusCode} in {elapsed.TotalMilliseconds}ms");
     }
 }

@@ -16,6 +16,8 @@ var webapi = builder.AddProject<Projects.N2J_WebApi>("webapi")
     .WithReference(mainDatabase)
     .WithOtlpExporter()
     .WithEnvironment("OTEL_SERVICE_NAME", "webapi")
+    .WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES", "true")
+    .WithEnvironment("OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES", "true")
     .WaitFor(postgres)
     .WaitFor(cache);
 
