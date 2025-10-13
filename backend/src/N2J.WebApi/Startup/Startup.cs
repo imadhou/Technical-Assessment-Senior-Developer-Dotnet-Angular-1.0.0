@@ -1,0 +1,140 @@
+﻿using Asp.Versioning.ApiExplorer;
+using N2J.Infrastructure;
+using N2J.Infrastructure.Persistence;
+using N2J.WebApi.Extensions;
+using N2J.WebApi.Middleware;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+
+namespace N2J.WebApi.Startup;
+
+public class Startup
+{
+    private readonly WebApplicationBuilder _builder;
+    private WebApplication? _app;
+
+    public Startup(WebApplicationBuilder builder)
+    {
+        _builder = builder;
+    }
+
+    public async Task RunAsync()
+    {
+        ConfigureTelemetry();
+        ConfigureConfiguration();
+        ConfigureInfrastructure();
+        ConfigureServices();
+
+        _app = _builder.Build();
+
+        ConfigureMiddleware();
+        ConfigureEndpoints();
+
+        await InitializeDevelopmentEnvironmentAsync();
+        await _app.RunAsync();
+    }
+
+    private void ConfigureTelemetry()
+    {
+        // MINIMAL OpenTelemetry configuration for Aspire
+        _builder.Services.AddOpenTelemetry()
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddRuntimeInstrumentation(); // This gives you basic system metrics
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation();
+            });
+    }
+
+    private void ConfigureConfiguration()
+    {
+        // Add any custom configuration sources here
+        _builder.Configuration.AddEnvironmentVariables("N2J_");
+    }
+
+    private void ConfigureInfrastructure()
+    {
+        _builder.AddRedisClient("cache");
+        _builder.AddNpgsqlDbContext<AppDbContext>("database");
+    }
+
+    private void ConfigureServices()
+    {
+        _builder.Services
+            .AddInfrastructureServices()
+            .AddApplicationServices()
+            .AddApiServices()
+            .AddSwaggerDocumentation()
+            .AddCustomHealthChecks();
+    }
+
+    private void ConfigureMiddleware()
+    {
+        if (_app == null) return;
+
+        if (_app.Environment.IsDevelopment())
+        {
+            _app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            _app.UseExceptionHandler("/error");
+            _app.UseHsts();
+        }
+
+        _app.UseHttpsRedirection();
+        _app.UseRouting();
+
+        // Custom middleware pipeline
+        _app.UseMiddleware<ExceptionHandlingMiddleware>();
+        _app.UseMiddleware<RequestLoggingMiddleware>();
+        _app.UseMiddleware<CorrelationIdMiddleware>(); // Added for better tracing
+
+        var apiVersionProvider = _app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+        _app.UseSwaggerDocumentation(apiVersionProvider);
+        _app.UseAuthorization();
+    }
+
+    private void ConfigureEndpoints()
+    {
+        if (_app == null) return;
+
+        _app.MapControllers();
+
+        // Health check endpoint
+        _app.MapHealthChecks("/health");
+
+        // Test endpoints to generate traffic for metrics
+        _app.MapGet("/api/test", () => new { message = "Test API", timestamp = DateTime.UtcNow });
+        _app.MapGet("/api/health", () => new { status = "Healthy", service = "WebApi" });
+
+        _app.MapGet("/", () => Results.Redirect("/swagger"));
+    }
+
+
+    private async Task InitializeDevelopmentEnvironmentAsync()
+    {
+        if (_app == null || !_app.Environment.IsDevelopment())
+            return;
+
+        using var scope = _app.Services.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Startup>>();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        try
+        {
+            logger.LogInformation("Starting database initialization...");
+            await DatabaseInitializer.InitializeAsync(context, logger);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred during database initialization");
+            throw;
+        }
+    }
+}

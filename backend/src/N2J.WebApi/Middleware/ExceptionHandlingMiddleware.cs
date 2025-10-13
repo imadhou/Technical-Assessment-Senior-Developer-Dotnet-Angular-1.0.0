@@ -28,7 +28,9 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception has occurred");
+            _logger.LogError(ex, "An unhandled exception has occurred for request {Method} {Path}",
+                context.Request.Method, context.Request.Path);
+
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -38,11 +40,23 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
+        var problemDetails = CreateProblemDetails(context, exception);
+        var json = JsonSerializer.Serialize(problemDetails, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        await context.Response.WriteAsync(json);
+    }
+
+    private ProblemDetails CreateProblemDetails(HttpContext context, Exception exception)
+    {
         var problemDetails = new ProblemDetails
         {
             Status = context.Response.StatusCode,
             Title = "An error occurred while processing your request",
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+            Instance = context.Request.Path
         };
 
         if (_environment.IsDevelopment())
@@ -52,11 +66,12 @@ public class ExceptionHandlingMiddleware
             problemDetails.Extensions["stackTrace"] = exception.StackTrace;
         }
 
-        var json = JsonSerializer.Serialize(problemDetails, new JsonSerializerOptions
+        // Add correlation ID if available
+        if (context.Response.Headers.TryGetValue("X-Correlation-ID", out var correlationId))
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+            problemDetails.Extensions["correlationId"] = correlationId.ToString();
+        }
 
-        await context.Response.WriteAsync(json);
+        return problemDetails;
     }
 }

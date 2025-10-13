@@ -1,21 +1,30 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres");
+// PostgreSQL with resource limits
+var postgres = builder.AddPostgres("postgres")
+    .WithPgAdmin();
+
 var mainDatabase = postgres.AddDatabase("database");
 
-var cache = builder.AddRedis("cache");
+// Redis with configuration
+var cache = builder.AddRedis("cache")
+    .WithRedisCommander();
+
+// API with full telemetry
 var webapi = builder.AddProject<Projects.N2J_WebApi>("webapi")
     .WithReference(cache)
     .WithReference(mainDatabase)
+    .WithOtlpExporter()
+    .WithEnvironment("OTEL_SERVICE_NAME", "webapi")
     .WaitFor(postgres)
-    .WaitFor(mainDatabase)
     .WaitFor(cache);
-var angular = builder.AddNpmApp("angular", "../../../frontend/")
+
+// Frontend
+var angular = builder.AddNpmApp("angular", "../../../frontend/", "start")
     .WithReference(webapi)
     .WaitFor(webapi)
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
-
 
 builder.Build().Run();
