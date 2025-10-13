@@ -3,8 +3,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 var postgres = builder.AddPostgres("postgres");
 var mainDatabase = postgres.AddDatabase("database");
 
-var cache = builder.AddRedis("cachegggg");
-var webapi = builder.AddProject<Projects.WebApi>("webapi")
+var cache = builder.AddRedis("cache");
+var webapi = builder.AddProject<Projects.N2J_WebApi>("webapi")
     .WithReference(cache)
     .WithReference(mainDatabase)
     .WaitFor(postgres)

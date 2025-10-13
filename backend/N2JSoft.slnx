@@ -1,7 +1,11 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src\AppHost\AppHost.csproj" Type="Classic C#" />
-    <Project Path="src\WebApi\WebApi.csproj" Type="Classic C#" />
+    <Project Path="src\N2J.WebApi\N2J.WebApi.csproj" Type="Classic C#" />
+    <Project Path="src\N2J.Domain\N2J.Domain.csproj" Type="Classic C#" />
+    <Project Path="src\N2J.Application\N2J.Application.csproj" Type="Classic C#" />
+    <Project Path="src\N2J.Infrastructure\N2J.Infrastructure.csproj" Type="Classic C#" />
+
   </Folder>
   <Folder Name="/test/">
     <Project Path="test\WebApi.Tests\WebApi.Tests.csproj" Type="Classic C#" />
