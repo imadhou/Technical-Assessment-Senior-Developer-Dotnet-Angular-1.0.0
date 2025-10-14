@@ -1,8 +1,11 @@
 ﻿using FluentValidation;
 using N2J.Application.Models.Queries;
 
-namespace N2J.Application.Models.Validators;
+namespace N2J.Application.Services;
 
+/// <summary>
+/// This class uses FluentValidation to validate the properties of the ExpenseQuery model.
+/// </summary>
 public class ExpenseQueryValidator : AbstractValidator<ExpenseQuery>
 {
     public ExpenseQueryValidator()

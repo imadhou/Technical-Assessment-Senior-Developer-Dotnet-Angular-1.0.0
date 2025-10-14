@@ -27,11 +27,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        // Apply to all DateTime properties
+        /// Use UTC converters for all DateTime and DateTime? properties
         configurationBuilder.Properties<DateTime>()
             .HaveConversion<UtcConverter>();
-
-        // Apply to all nullable DateTime properties
         configurationBuilder.Properties<DateTime?>()
             .HaveConversion<NullableUtcConverter>();
     }

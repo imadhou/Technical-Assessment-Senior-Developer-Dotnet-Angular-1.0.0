@@ -27,8 +27,8 @@ public class ExpenseService: IExpenseService
         var expenses = await _expenseRepository.GetAllAsync(
             predicates: predicates,
             orderBy: orderBy,
-            take: query.Take,
-            skip: query.Skip,
+            take: query.PageSize,
+            skip: (query.Page - 1) * query.PageSize,
             e => e.ExpenseCategory,
             e => e.User
         );

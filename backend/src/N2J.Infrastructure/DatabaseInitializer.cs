@@ -6,6 +6,16 @@ namespace N2J.Infrastructure;
 
 public static class DatabaseInitializer
 {
+    /// <summary>
+    /// Initializes the database asynchronously, using either migrations or the `EnsureCreated` approach.
+    /// </summary>
+    /// <remarks>This method initializes the database by either applying migrations or creating the database
+    /// schema directly,  depending on the value of <paramref name="useMigrations"/></remarks>
+    /// <param name="context">The <see cref="AppDbContext"/> instance representing the database context to initialize.</param>
+    /// <param name="logger">The <see cref="ILogger"/> instance used to log messages during the initialization process.</param>
+    /// <param name="useMigrations">A value indicating whether to use migrations for database initialization.  <see langword="true"/> to apply
+    /// migrations; <see langword="false"/> to use the `EnsureCreated` approach. The default is <see langword="true"/>.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public static async Task InitializeAsync(AppDbContext context, ILogger logger, bool useMigrations = true)
     {
         try

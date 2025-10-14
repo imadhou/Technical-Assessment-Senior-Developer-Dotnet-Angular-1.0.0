@@ -22,7 +22,6 @@ public class Startup
     public async Task RunAsync()
     {
         ConfigureTelemetry();
-        ConfigureConfiguration();
         ConfigureInfrastructure();
         ConfigureServices();
 
@@ -35,35 +34,34 @@ public class Startup
         await _app.RunAsync();
     }
 
+    /// <summary>
+    /// Configures OpenTelemetry for metrics, tracing, and logging.
+    /// Allows to monitor and trace the application's performance and behavior.
+    /// Exports telemetry data to an OTLP collector. (Aspire UI).
+    /// </summary>
     private void ConfigureTelemetry()
     {
-        // MINIMAL OpenTelemetry configuration for Aspire
+        // OpenTelemetry configuration for Aspire
         _builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
                        .AddHttpClientInstrumentation()
-                       .AddRuntimeInstrumentation() // This gives you basic system metrics
-                       .AddOtlpExporter(); // Export metrics via OTLP
+                       .AddRuntimeInstrumentation()
+                       .AddOtlpExporter();
             })
             .WithTracing(tracing =>
             {
                 tracing.AddAspNetCoreInstrumentation()
                        .AddHttpClientInstrumentation()
-                       .AddOtlpExporter(); // Export traces via OTLP
+                       .AddOtlpExporter();
             });
 
-        // Also, add OpenTelemetry logging
+        // OpenTelemetry logging
         _builder.Logging.AddOpenTelemetry(logging =>
         {
             logging.AddOtlpExporter();
         });
-    }
-
-    private void ConfigureConfiguration()
-    {
-        // Add any custom configuration sources here
-        _builder.Configuration.AddEnvironmentVariables("N2J_");
     }
 
     private void ConfigureInfrastructure()
@@ -78,8 +76,7 @@ public class Startup
             .AddInfrastructureServices()
             .AddApplicationServices()
             .AddApiServices()
-            .AddSwaggerDocumentation()
-            .AddCustomHealthChecks();
+            .AddSwaggerDocumentation();
     }
 
     private void ConfigureMiddleware()
@@ -102,7 +99,6 @@ public class Startup
         // Custom middleware pipeline
         _app.UseMiddleware<ExceptionHandlingMiddleware>();
         _app.UseMiddleware<RequestLoggingMiddleware>();
-        _app.UseMiddleware<CorrelationIdMiddleware>(); // Added for better tracing
 
         var apiVersionProvider = _app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
         _app.UseSwaggerDocumentation(apiVersionProvider);
