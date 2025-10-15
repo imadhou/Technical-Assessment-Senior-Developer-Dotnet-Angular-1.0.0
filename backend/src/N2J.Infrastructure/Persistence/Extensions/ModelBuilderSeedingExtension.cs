@@ -11,7 +11,7 @@ namespace N2J.Infrastructure.Persistence.Extensions;
 /// expense categories, and expenses. The seeded data includes static values for dates and identifiers to ensure
 /// consistency across different environments. This method is typically used during database initialization or
 /// migrations to populate the database with initial data.</remarks>
-public static class ModelBuilderExtension
+public static class ModelBuilderSeedingExtension
 {
     // Define static, hardcoded dates
     private static readonly DateTime _seedDate = new DateTime(2025, 10, 12, 12, 0, 0, DateTimeKind.Utc);
@@ -161,7 +161,8 @@ public static class ModelBuilderExtension
                 Date = _expenseDate1,
                 UserId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                 ExpenseCategoryId = Guid.Parse("aaaaaaaa-1111-aaaa-1111-aaaaaaaa1111"),
-                CreatedAt = _expenseDate1
+                CreatedAt = _expenseDate1,
+                CreatedBy = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd")
             },
             new Expense
             {
@@ -172,7 +173,8 @@ public static class ModelBuilderExtension
                 Date = _expenseDate2,
                 UserId = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                 ExpenseCategoryId = Guid.Parse("bbbbbbbb-2222-bbbb-2222-bbbbbbbb2222"),
-                CreatedAt = _expenseDate2 
+                CreatedAt = _expenseDate2,
+                CreatedBy = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
             },
             new Expense
             {
@@ -183,7 +185,8 @@ public static class ModelBuilderExtension
                 Date = _expenseDate3,
                 UserId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                 ExpenseCategoryId = Guid.Parse("cccccccc-3333-cccc-3333-cccccccc3333"),
-                CreatedAt = _expenseDate3
+                CreatedAt = _expenseDate3,
+                CreatedBy = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd")
             }
         );
     }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using N2J.Application.Interfaces;
+using N2J.Application.Models.Commands;
 using N2J.Application.Models.Dtos;
 using N2J.Application.Models.Queries;
 using N2J.Domain.Entities;
@@ -18,6 +19,53 @@ public class ExpenseService: IExpenseService
         _expenseRepository = expenseRepository;
         _mapper = mapper;
     }
+
+    public async Task<ExpenseDto> UpdateExpenseStatus(Guid expenseId, string newStatus, Guid updatedBy)
+    {
+        var expense = await _expenseRepository.GetByIdAsync(expenseId);
+        if (expense == null)
+        {
+            throw new KeyNotFoundException($"Expense with ID {expenseId} not found.");
+        }
+
+        expense.Status = newStatus;
+        expense.UpdatedAt = DateTime.UtcNow;
+        expense.UpdatedBy = updatedBy;
+
+        await _expenseRepository.UpdateAsync(expense, updatedBy, logChanges: true);
+        return _mapper.Map<ExpenseDto>(expense);
+    }
+
+    public async Task<ExpenseDto> UpdateExpense(Guid expenseId, ExpenseCommand expenseCommand, Guid updatedBy)
+    {
+        var expense = await _expenseRepository.GetByIdAsync(expenseId);
+
+        if (expense == null)
+        {
+            throw new KeyNotFoundException($"Expense with ID {expenseId} not found.");
+        }
+
+        expense = _mapper.Map(expenseCommand, expense);
+        expense.UpdatedAt = DateTime.UtcNow;
+        expense.UpdatedBy = updatedBy;
+
+        await _expenseRepository.UpdateAsync(expense, updatedBy, logChanges: true);
+        return _mapper.Map<ExpenseDto>(expense);
+    }
+
+    public async Task<ExpenseDto> CreateExpense(ExpenseCommand expenseCommand, Guid createdBy)
+    {
+        expenseCommand.UserId = expenseCommand.UserId ?? createdBy;
+        Expense expense = _mapper.Map<Expense>(expenseCommand);
+        expense.CreatedBy = createdBy;
+        expense.CreatedAt = DateTime.UtcNow;
+
+        await _expenseRepository.AddAsync(expense, createdBy, logChanges: true);
+
+        return _mapper.Map<ExpenseDto>(expense);
+    }
+
+
 
     public async Task<IEnumerable<ExpenseDto>> GetAll(ExpenseQuery query)
     {
@@ -44,7 +92,6 @@ public class ExpenseService: IExpenseService
         var expenseDto = _mapper.Map<ExpenseDto>(expense);
         return expenseDto;
     }
-
 
     private IEnumerable<Expression<Func<Expense, bool>>> BuildPredicates(ExpenseQuery query)
     {

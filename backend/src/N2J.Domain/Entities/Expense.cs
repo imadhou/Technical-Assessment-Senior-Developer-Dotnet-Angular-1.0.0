@@ -14,6 +14,9 @@ public class Expense
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
+    public Guid CreatedBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
+
     // Navigation properties
     public virtual ExpenseCategory ExpenseCategory { get; set; } = null!;
     public virtual User User { get; set; } = null!;

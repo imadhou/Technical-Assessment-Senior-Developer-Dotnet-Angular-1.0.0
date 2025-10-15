@@ -17,7 +17,7 @@ namespace N2J.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -93,6 +93,9 @@ namespace N2J.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
@@ -123,6 +126,9 @@ namespace N2J.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
@@ -141,6 +147,7 @@ namespace N2J.Infrastructure.Migrations
                             Id = new Guid("aaaa1111-aaaa-1111-aaaa-aaaaaaaaaaaa"),
                             Amount = 500m,
                             CreatedAt = new DateTime(2025, 10, 2, 12, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             Date = new DateTime(2025, 10, 2, 12, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Flight ticket to attend the tech conference",
                             ExpenseCategoryId = new Guid("aaaaaaaa-1111-aaaa-1111-aaaaaaaa1111"),
@@ -153,6 +160,7 @@ namespace N2J.Infrastructure.Migrations
                             Id = new Guid("bbbb2222-bbbb-2222-bbbb-bbbbbbbbbbbb"),
                             Amount = 150m,
                             CreatedAt = new DateTime(2025, 10, 7, 12, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             Date = new DateTime(2025, 10, 7, 12, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Lunch with the team to discuss project updates",
                             ExpenseCategoryId = new Guid("bbbbbbbb-2222-bbbb-2222-bbbbbbbb2222"),
@@ -165,6 +173,7 @@ namespace N2J.Infrastructure.Migrations
                             Id = new Guid("cccc3333-cccc-3333-cccc-cccccccccccc"),
                             Amount = 300m,
                             CreatedAt = new DateTime(2025, 10, 10, 12, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             Date = new DateTime(2025, 10, 10, 12, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Ergonomic office chair for better comfort",
                             ExpenseCategoryId = new Guid("cccccccc-3333-cccc-3333-cccccccc3333"),
@@ -306,6 +315,11 @@ namespace N2J.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
 
@@ -330,6 +344,7 @@ namespace N2J.Infrastructure.Migrations
                             Email = "charles.leclerc@n2j.fr",
                             FirstName = "Charles",
                             LastName = "Leclerc",
+                            PasswordHash = "",
                             RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
                         },
                         new
@@ -340,6 +355,7 @@ namespace N2J.Infrastructure.Migrations
                             Email = "max.verstappen@n2j.fr",
                             FirstName = "Max",
                             LastName = "Verstappen",
+                            PasswordHash = "",
                             RoleId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
                         new
@@ -350,6 +366,7 @@ namespace N2J.Infrastructure.Migrations
                             Email = "oscar.piastri@n2j.fr",
                             FirstName = "Oscar",
                             LastName = "Piastri",
+                            PasswordHash = "",
                             RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
                         },
                         new
@@ -360,6 +377,7 @@ namespace N2J.Infrastructure.Migrations
                             Email = "lando.norris@techsol.us",
                             FirstName = "Lando",
                             LastName = "Norris",
+                            PasswordHash = "",
                             RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
                         },
                         new
@@ -370,8 +388,58 @@ namespace N2J.Infrastructure.Migrations
                             Email = "george.russell@techsol.us",
                             FirstName = "George",
                             LastName = "Russell",
+                            PasswordHash = "",
                             RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
                         });
+                });
+
+            modelBuilder.Entity("N2J.Infrastructure.Persistence.Audit.ChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ChangedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChangesJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("EntityState")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id")
+                        .HasName("PK_ChangeLog");
+
+                    b.HasIndex(new[] { "ChangeType" }, "IX_ChangeLog_ChangeType");
+
+                    b.HasIndex(new[] { "ChangedAt" }, "IX_ChangeLog_ChangedAt");
+
+                    b.HasIndex(new[] { "ChangedBy" }, "IX_ChangeLog_ChangedBy");
+
+                    b.HasIndex(new[] { "EntityId" }, "IX_ChangeLog_EntityId");
+
+                    b.HasIndex(new[] { "EntityName" }, "IX_ChangeLog_EntityName");
+
+                    b.ToTable("ChangeLogs", (string)null);
                 });
 
             modelBuilder.Entity("N2J.Domain.Entities.Expense", b =>

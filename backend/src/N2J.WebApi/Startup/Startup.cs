@@ -64,6 +64,9 @@ public class Startup
         });
     }
 
+    /// <summary>
+    /// Add redis cache and database context to the service collection.
+    /// </summary>
     private void ConfigureInfrastructure()
     {
         _builder.AddRedisClient("cache");
@@ -75,7 +78,7 @@ public class Startup
         _builder.Services
             .AddInfrastructureServices()
             .AddApplicationServices()
-            .AddApiServices()
+            .AddApiServices(_builder.Configuration)
             .AddSwaggerDocumentation();
     }
 

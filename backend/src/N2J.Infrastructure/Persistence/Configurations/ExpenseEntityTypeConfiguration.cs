@@ -48,6 +48,13 @@ internal sealed class ExpenseEntityTypeConfiguration : IEntityTypeConfiguration<
         builder.Property(e => e.UpdatedAt)
             .IsRequired(false);
 
+        builder.Property(e => e.CreatedBy)
+            .IsRequired()
+            .HasColumnType("uuid");
+
+        builder.Property(e => e.UpdatedBy)
+            .HasColumnType("uuid");
+
         builder.Property(e => e.ExpenseCategoryId)
             .IsRequired();
 

@@ -6,7 +6,7 @@ namespace N2J.WebApi.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/test")]
-public class TestV1Controller : ControllerBase  // Different name
+public class TestController : ControllerBase  // Different name
 {
     [HttpGet]
     public IActionResult Get()

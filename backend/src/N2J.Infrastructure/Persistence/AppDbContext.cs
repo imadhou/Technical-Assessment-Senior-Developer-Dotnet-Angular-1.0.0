@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using N2J.Domain.Entities;
+using N2J.Infrastructure.Persistence.Audit;
 using N2J.Infrastructure.Persistence.Configurations;
 using N2J.Infrastructure.Persistence.DateTimeConverters;
 using N2J.Infrastructure.Persistence.Extensions;
@@ -13,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
+    public DbSet<ChangeLog> ChangeLogs => Set<ChangeLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,6 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new RoleEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new CompanyEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ExpenseCategoryEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ChangeLogEntityTypeConfiguration());
 
         modelBuilder.Seed();
     }

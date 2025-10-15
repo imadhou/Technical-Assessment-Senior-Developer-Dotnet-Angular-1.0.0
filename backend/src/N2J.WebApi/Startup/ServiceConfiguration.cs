@@ -1,11 +1,14 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
+using N2J.Application.Models.Dtos.UserAuth;
 using N2J.Infrastructure.Persistence;
+using System.Text;
 using System.Text.Json;
 
 namespace N2J.WebApi.Startup;
-
 
 /// <summary>
 /// Configures services for the API, including controllers, versioning, health checks, and JSON options.
@@ -16,8 +19,9 @@ public static class ServiceConfiguration
     /// Configures and adds API-related services to the service collection.
     /// </summary>
     /// <param name="services"></param>
+    /// <param name="configuration"></param>
     /// <returns></returns>
-    public static IServiceCollection AddApiServices(this IServiceCollection services)
+    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers()
             .AddCustomJsonOptions()
@@ -25,6 +29,8 @@ public static class ServiceConfiguration
 
         services.AddApiVersioningConfiguration()
             .AddCustomHealthChecks();
+
+        services.AddAuthServices(configuration);
 
         return services;
     }
@@ -102,7 +108,6 @@ public static class ServiceConfiguration
         });
     }
 
-
     /// <summary>
     /// Adds and configures custom health checks for the application, including database and Redis checks.
     /// </summary>
@@ -118,6 +123,65 @@ public static class ServiceConfiguration
 
         return services;
     }
+
+    /// <summary>
+    /// Adds and configures authentication and authorization services.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Configure JWT Settings
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+        var key = Encoding.ASCII.GetBytes(jwtSettings!.Secret);
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero // Remove clock skew for testing
+            };
+
+            // Add events for debugging
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    Console.WriteLine("Token validated successfully");
+                    return Task.CompletedTask;
+                },
+                OnChallenge = context =>
+                {
+                    Console.WriteLine($"OnChallenge: {context.Error}, {context.ErrorDescription}");
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
+        services.AddAuthorization();
+
+        return services;
+    }   
 }
 
 public class CustomHealthCheck : IHealthCheck

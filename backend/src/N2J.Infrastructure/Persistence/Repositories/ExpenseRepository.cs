@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using N2J.Domain.Entities;
 using N2J.Domain.Interfaces;
+using N2J.Infrastructure.Persistence.Audit;
 
 namespace N2J.Infrastructure.Persistence.Repositories;
 
@@ -10,7 +11,7 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
     private readonly AppDbContext _context;
     private readonly DbSet<Expense> _dbSet;
 
-    public ExpenseRepository(AppDbContext context) : base(context)
+    public ExpenseRepository(AppDbContext context, IChangeLogRepository changeLogRepository) : base(context, changeLogRepository)
     {
         _context = context;
         _dbSet = _context.Set<Expense>();
@@ -23,7 +24,7 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
         foreach (var include in includes)
             query = query.Include(include);
 
-        return await query.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+        return await query.AsTracking().FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public async Task<IEnumerable<Expense>> GetAllAsync(IEnumerable<Expression<Func<Expense, bool>>> predicates, Expression<Func<Expense, object>> orderBy, int take, int skip, params Expression<Func<Expense, object>>[] includes)

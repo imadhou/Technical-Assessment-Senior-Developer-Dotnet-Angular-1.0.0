@@ -3,9 +3,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace N2J.WebApi.Extensions;
+namespace N2J.WebApi.Startup;
 
-public static class SwaggerExtensions
+public static class SwaggerConfiguration
 {
     public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
     {
@@ -80,33 +80,29 @@ public class SwaggerGenOptionsSetup : IConfigureOptions<SwaggerGenOptions>
         foreach (var xmlFile in xmlFiles)
             options.IncludeXmlComments(xmlFile, includeControllerXmlComments: true);
 
-        /* TODO: Enable JWT Auth in Swagger UI
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
+        // Add JWT Authentication to Swagger
+        options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+            Name = "Authorization",
+            In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
 
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+        {
+            {
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
+                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header
-                        },
-                        Array.Empty<string>()
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Bearer"
                     }
-                });
-        */
+                },
+                Array.Empty<string>()
+            }
+        });
     }
 }

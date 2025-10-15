@@ -30,6 +30,10 @@ internal sealed class UserEntityTypeConfiguration : IEntityTypeConfiguration<Use
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Property(u => u.PasswordHash)
+            .IsRequired()
+            .HasMaxLength(255);
+
         builder.Property(u => u.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("NOW()");
