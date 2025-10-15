@@ -21,6 +21,10 @@ internal sealed class CompanyEntityTypeConfiguration : IEntityTypeConfiguration<
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(c => c.Domain)
+           .IsRequired()
+           .HasMaxLength(200);
+
         builder.Property(c => c.Address)
             .IsRequired()
             .HasMaxLength(200);

@@ -65,9 +65,10 @@ public class ExpenseController : ControllerBase
 
         try
         {
-            var expense = await _expenseService.CreateExpenseAsync(command, User.ToUserContext().UserId);
+            var contextUser = User.ToUserContext();
+            var expense = await _expenseService.CreateExpenseAsync(command, contextUser.UserId, contextUser.CompanyId);
 
-            expense.Links = GenerateExpenseLinks(expense.Id, expense.Status, User.ToUserContext());
+            expense.Links = GenerateExpenseLinks(expense.Id, expense.Status, contextUser);
             return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id, version = HttpContext.GetRequestedApiVersion()?.ToString() }, expense);
         }
         catch (ReferenceNotFoundException ex)
@@ -100,9 +101,10 @@ public class ExpenseController : ControllerBase
 
         try
         {
-            var expense = await _expenseService.UpdateExpenseAsync(id, command, User.ToUserContext().UserId);
+            var contextUser = User.ToUserContext();
+            var expense = await _expenseService.UpdateExpenseAsync(id, command, contextUser.UserId, contextUser.CompanyId);
 
-            expense.Links = GenerateExpenseLinks(expense.Id, expense.Status, User.ToUserContext());
+            expense.Links = GenerateExpenseLinks(expense.Id, expense.Status, contextUser);
             return Ok(expense);
         }
         catch (EntityNotFoundException ex)
@@ -140,9 +142,10 @@ public class ExpenseController : ControllerBase
 
         try
         {
-            var expense = await _expenseService.UpdateExpenseStatusAsync(id, command.NewStatus, User.ToUserContext().UserId);
+            var contextUser = User.ToUserContext();
+            var expense = await _expenseService.UpdateExpenseStatusAsync(id, command.NewStatus, contextUser.UserId, contextUser.CompanyId);
 
-            expense.Links = GenerateExpenseLinks(expense.Id, expense.Status, User.ToUserContext());
+            expense.Links = GenerateExpenseLinks(expense.Id, expense.Status, contextUser);
             return Ok(expense);
         }
         catch (EntityNotFoundException ex)
@@ -177,7 +180,8 @@ public class ExpenseController : ControllerBase
             });
         }
 
-        var expenses = await _expenseService.GetAllWithCountAsync(query);
+        var contextUser = User.ToUserContext();
+        var expenses = await _expenseService.GetAllWithCountAsync(query, contextUser.CompanyId);
 
         var links = GenerateCollectionLinks(query);
         return Ok(new ExpenseCollectionDto() { Expenses = expenses.Items, Links = links, TotalCount = expenses.TotalCount, TotalPages = (int)Math.Ceiling(expenses.TotalCount / (double)query.PageSize) });

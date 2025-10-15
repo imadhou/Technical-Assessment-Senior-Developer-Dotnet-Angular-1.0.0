@@ -1,5 +1,5 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using N2J.Infrastructure;
+using N2J.Infrastructure.DataSeeding;
 using N2J.Infrastructure.Persistence;
 using N2J.WebApi.Extensions;
 using N2J.WebApi.Middleware;
@@ -133,11 +133,12 @@ public class Startup
         using var scope = _app.Services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Startup>>();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var serviceProvider = scope.ServiceProvider;
 
         try
         {
             logger.LogInformation("Starting database initialization...");
-            await DatabaseInitializer.InitializeAsync(context, logger);
+            await DatabaseInitializer.InitializeAsync(context, logger, serviceProvider, true, true);
         }
         catch (Exception ex)
         {

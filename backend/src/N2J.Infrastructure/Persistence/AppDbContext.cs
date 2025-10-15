@@ -24,8 +24,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new CompanyEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ExpenseCategoryEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new ChangeLogEntityTypeConfiguration());
-
-        modelBuilder.Seed();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

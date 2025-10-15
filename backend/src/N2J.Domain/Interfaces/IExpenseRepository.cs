@@ -41,8 +41,8 @@ public interface IExpenseRepository: IRepository<Expense>
     /// </summary>
     /// <param name="predicates"></param>
     /// <param name="orderBy"></param>
-    /// <param name="page"></param>
-    /// <param name="pageSize"></param>
+    /// <param name="take"></param>
+    /// <param name="skip"></param>
     /// <param name="includes"></param>
     /// <returns></returns>
     Task<(ICollection<Expense> Items, int TotalCount)> GetAllWithCountAsync(

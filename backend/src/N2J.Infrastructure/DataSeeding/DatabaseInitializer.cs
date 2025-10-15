@@ -1,25 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using N2J.Infrastructure.Persistence;
 
-namespace N2J.Infrastructure;
+namespace N2J.Infrastructure.DataSeeding;
 
 public static class DatabaseInitializer
 {
-    /// <summary>
-    /// Initializes the database asynchronously, using either migrations or the `EnsureCreated` approach.
-    /// </summary>
-    /// <remarks>This method initializes the database by either applying migrations or creating the database
-    /// schema directly,  depending on the value of <paramref name="useMigrations"/></remarks>
-    /// <param name="context">The <see cref="AppDbContext"/> instance representing the database context to initialize.</param>
-    /// <param name="logger">The <see cref="ILogger"/> instance used to log messages during the initialization process.</param>
-    /// <param name="useMigrations">A value indicating whether to use migrations for database initialization.  <see langword="true"/> to apply
-    /// migrations; <see langword="false"/> to use the `EnsureCreated` approach. The default is <see langword="true"/>.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task InitializeAsync(AppDbContext context, ILogger logger, bool useMigrations = true)
+    public static async Task InitializeAsync(AppDbContext context, ILogger logger, IServiceProvider serviceProvider, bool useMigrations = true, bool seedData = false)
     {
         try
         {
+            logger.LogInformation("Starting database initialization...");
+            logger.LogInformation("Configuration - UseMigrations: {UseMigrations}, SeedData: {SeedData}", useMigrations, seedData);
+
             if (useMigrations)
             {
                 await InitializeWithMigrationsAsync(context, logger);
@@ -28,6 +22,19 @@ public static class DatabaseInitializer
             {
                 await InitializeWithEnsureCreatedAsync(context, logger);
             }
+
+            // Seed data if requested
+            if (seedData)
+            {
+                logger.LogInformation("Data seeding requested, starting seed process...");
+                await SeedSampleDataAsync(context, logger, serviceProvider);
+            }
+            else
+            {
+                logger.LogInformation("Data seeding skipped (seedData = false)");
+            }
+
+            logger.LogInformation("Database initialization completed successfully");
         }
         catch (Exception ex)
         {
@@ -73,6 +80,40 @@ public static class DatabaseInitializer
         else
         {
             logger.LogInformation("Database already exists");
+        }
+    }
+
+    private static async Task SeedSampleDataAsync(AppDbContext context, ILogger logger, IServiceProvider serviceProvider)
+    {
+        try
+        {
+            logger.LogInformation("Starting sample data seeding...");
+
+            // Check if data already exists
+            var hasCompanies = await context.Companies.AnyAsync();
+            var hasUsers = await context.Users.AnyAsync();
+
+            logger.LogInformation("Current data status - Companies: {HasCompanies}, Users: {HasUsers}",
+                hasCompanies, hasUsers);
+
+            if (hasCompanies)
+            {
+                logger.LogInformation("Data already exists, skipping seeding");
+                return;
+            }
+
+            logger.LogInformation("Resolving DataSeeder from service provider...");
+            var seeder = serviceProvider.GetRequiredService<DataSeeder>();
+
+            logger.LogInformation("Calling DataSeeder.SeedAsync()...");
+            await seeder.SeedAsync();
+
+            logger.LogInformation("Sample data seeding completed successfully");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to seed sample data");
+            throw;
         }
     }
 

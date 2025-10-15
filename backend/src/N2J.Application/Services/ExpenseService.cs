@@ -25,12 +25,17 @@ public class ExpenseService: IExpenseService
         _userRepository = userRepository;
     }
 
-    public async Task<ExpenseDto> UpdateExpenseStatusAsync(Guid expenseId, string newStatus, Guid updatedBy)
+    public async Task<ExpenseDto> UpdateExpenseStatusAsync(Guid expenseId, string newStatus, Guid updatedBy, Guid companyId)
     {
-        var expense = await _expenseRepository.GetByIdAsync(expenseId);
+        var expense = await _expenseRepository.GetByIdAsync(expenseId, e => e.User);
         if (expense == null)
         {
             throw new EntityNotFoundException("Expnese not found");
+        }
+
+        if(expense.User.CompanyId != companyId)
+        {
+            throw new UnauthorizedAccessException();
         }
 
         expense.Status = newStatus;
@@ -41,13 +46,18 @@ public class ExpenseService: IExpenseService
         return _mapper.Map<ExpenseDto>(expense);
     }
 
-    public async Task<ExpenseDto> UpdateExpenseAsync(Guid expenseId, ExpenseCommand expenseCommand, Guid updatedBy)
+    public async Task<ExpenseDto> UpdateExpenseAsync(Guid expenseId, ExpenseCommand expenseCommand, Guid updatedBy, Guid companyId)
     {
-        var expense = await _expenseRepository.GetByIdAsync(expenseId);
+        var expense = await _expenseRepository.GetByIdAsync(expenseId, e => e.User);
 
         if (expense == null)
         {
             throw new EntityNotFoundException($"Expense not found.");
+        }
+
+        if (expense.User.CompanyId != companyId)
+        {
+            throw new UnauthorizedAccessException();
         }
 
         var expenseCategory = await _expenceCategoryRepository.GetByIdAsync(expenseCommand.ExpenseCategoryId);
@@ -56,10 +66,15 @@ public class ExpenseService: IExpenseService
             throw new ReferenceNotFoundException($"Expense category with ID {expenseCommand.ExpenseCategoryId} not found.");
         }
 
-        var expenseUser = await _userRepository.GetByIdAsync(expenseCommand.UserId);
-        if (expenseUser == null)
+        var expenseNewUser = await _userRepository.GetByIdAsync(expenseCommand.UserId);
+        if (expenseNewUser == null)
         {
             throw new ReferenceNotFoundException($"User with ID {expenseCommand.UserId} not found.");
+        }
+
+        if (expenseNewUser.CompanyId != companyId)
+        {
+            throw new UnauthorizedAccessException();
         }
 
         expense = _mapper.Map(expenseCommand, expense);
@@ -70,7 +85,7 @@ public class ExpenseService: IExpenseService
         return _mapper.Map<ExpenseDto>(expense);
     }
 
-    public async Task<ExpenseDto> CreateExpenseAsync(ExpenseCommand expenseCommand, Guid createdBy)
+    public async Task<ExpenseDto> CreateExpenseAsync(ExpenseCommand expenseCommand, Guid createdBy, Guid companyId)
     {
         var expenseCategory = await _expenceCategoryRepository.GetByIdAsync(expenseCommand.ExpenseCategoryId);
         if (expenseCategory == null)
@@ -82,6 +97,11 @@ public class ExpenseService: IExpenseService
         if (expenseUser == null)
         {
             throw new ReferenceNotFoundException($"User with ID {expenseCommand.UserId} not found.");
+        }
+
+        if(expenseUser.CompanyId != companyId)
+        {
+            throw new UnauthorizedAccessException();
         }
 
         expenseCommand.UserId = expenseCommand.UserId;
@@ -96,9 +116,9 @@ public class ExpenseService: IExpenseService
 
 
 
-    public async Task<ICollection<ExpenseDto>> GetAllAsync(ExpenseQuery query)
+    public async Task<ICollection<ExpenseDto>> GetAllAsync(ExpenseQuery query, Guid companyId)
     {
-        var predicates = BuildPredicates(query);
+        var predicates = BuildPredicates(query, companyId);
         var orderBy = GetOrderByExpression(query);
 
         var expenses = await _expenseRepository.GetAllAsync(
@@ -114,9 +134,9 @@ public class ExpenseService: IExpenseService
         return expenseDtos;
     }
 
-    public async Task<(ICollection<ExpenseDto> Items, int TotalCount)> GetAllWithCountAsync(ExpenseQuery query)
+    public async Task<(ICollection<ExpenseDto> Items, int TotalCount)> GetAllWithCountAsync(ExpenseQuery query, Guid companyId)
     {
-        var predicates = BuildPredicates(query);
+        var predicates = BuildPredicates(query, companyId);
         var orderBy = GetOrderByExpression(query);
 
         var expenses = await _expenseRepository.GetAllWithCountAsync(
@@ -139,9 +159,10 @@ public class ExpenseService: IExpenseService
         return expenseDto;
     }
 
-    private ICollection<Expression<Func<Expense, bool>>> BuildPredicates(ExpenseQuery query)
+    private ICollection<Expression<Func<Expense, bool>>> BuildPredicates(ExpenseQuery query, Guid companyId)
     {
         var predicates = new List<Expression<Func<Expense, bool>>>();
+        predicates.Add(e => e.User.CompanyId == companyId);
 
         if (!string.IsNullOrWhiteSpace(query.Description))
         {

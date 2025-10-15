@@ -12,15 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace N2J.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251012222644_ModelSetup")]
-    partial class ModelSetup
+    [Migration("20251015215605_InitDataBase")]
+    partial class InitDataBase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -49,6 +49,11 @@ namespace N2J.Infrastructure.Migrations
                         .HasColumnType("character varying(3)")
                         .HasDefaultValue("EUR");
 
+                    b.Property<string>("Domain")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -61,24 +66,6 @@ namespace N2J.Infrastructure.Migrations
                         .HasName("PK_Company");
 
                     b.ToTable("Companies", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Address = "1 Rue de la Paix, 75002 Paris, France",
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "EUR",
-                            Name = "N2JSoft"
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Address = "123 Tech Avenue, San Francisco, CA, USA",
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "USD",
-                            Name = "Tech Solutions"
-                        });
                 });
 
             modelBuilder.Entity("N2J.Domain.Entities.Expense", b =>
@@ -95,6 +82,9 @@ namespace N2J.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
@@ -126,6 +116,9 @@ namespace N2J.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
@@ -137,44 +130,6 @@ namespace N2J.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Expenses", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaa1111-aaaa-1111-aaaa-aaaaaaaaaaaa"),
-                            Amount = 500m,
-                            CreatedAt = new DateTime(2025, 10, 2, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2025, 10, 2, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Flight ticket to attend the tech conference",
-                            ExpenseCategoryId = new Guid("aaaaaaaa-1111-aaaa-1111-aaaaaaaa1111"),
-                            Status = "Pending",
-                            Title = "Flight to Conference",
-                            UserId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd")
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbb2222-bbbb-2222-bbbb-bbbbbbbbbbbb"),
-                            Amount = 150m,
-                            CreatedAt = new DateTime(2025, 10, 7, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2025, 10, 7, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Lunch with the team to discuss project updates",
-                            ExpenseCategoryId = new Guid("bbbbbbbb-2222-bbbb-2222-bbbbbbbb2222"),
-                            Status = "Pending",
-                            Title = "Team Lunch",
-                            UserId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
-                        },
-                        new
-                        {
-                            Id = new Guid("cccc3333-cccc-3333-cccc-cccccccccccc"),
-                            Amount = 300m,
-                            CreatedAt = new DateTime(2025, 10, 10, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2025, 10, 10, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Ergonomic office chair for better comfort",
-                            ExpenseCategoryId = new Guid("cccccccc-3333-cccc-3333-cccccccc3333"),
-                            Status = "Pending",
-                            Title = "Office Chair",
-                            UserId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd")
-                        });
                 });
 
             modelBuilder.Entity("N2J.Domain.Entities.ExpenseCategory", b =>
@@ -208,32 +163,6 @@ namespace N2J.Infrastructure.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("ExpenseCategories", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-1111-aaaa-1111-aaaaaaaa1111"),
-                            CompanyId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Expenses related to travel",
-                            Name = "Travel"
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-2222-bbbb-2222-bbbbbbbb2222"),
-                            CompanyId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Expenses for meals and entertainment",
-                            Name = "Meals"
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-3333-cccc-3333-cccccccc3333"),
-                            CompanyId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Expenses for office supplies and equipment",
-                            Name = "Office Supplies"
-                        });
                 });
 
             modelBuilder.Entity("N2J.Domain.Entities.Role", b =>
@@ -257,26 +186,6 @@ namespace N2J.Infrastructure.Migrations
                         .HasName("PK_Roles");
 
                     b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            Description = "Administrator with full access",
-                            Name = "Admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Description = "Manager with limited access",
-                            Name = "Manager"
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Description = "Employee with basic access",
-                            Name = "Employee"
-                        });
                 });
 
             modelBuilder.Entity("N2J.Domain.Entities.User", b =>
@@ -309,6 +218,11 @@ namespace N2J.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
 
@@ -323,58 +237,52 @@ namespace N2J.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users", (string)null);
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            CompanyId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "charles.leclerc@n2j.fr",
-                            FirstName = "Charles",
-                            LastName = "Leclerc",
-                            RoleId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                        },
-                        new
-                        {
-                            Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
-                            CompanyId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "max.verstappen@n2j.fr",
-                            FirstName = "Max",
-                            LastName = "Verstappen",
-                            RoleId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
-                        },
-                        new
-                        {
-                            Id = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff"),
-                            CompanyId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "oscar.piastri@n2j.fr",
-                            FirstName = "Oscar",
-                            LastName = "Piastri",
-                            RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
-                        },
-                        new
-                        {
-                            Id = new Guid("11111111-aaaa-1111-aaaa-111111111111"),
-                            CompanyId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "lando.norris@techsol.us",
-                            FirstName = "Lando",
-                            LastName = "Norris",
-                            RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-bbbb-2222-bbbb-222222222222"),
-                            CompanyId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2025, 10, 12, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "george.russell@techsol.us",
-                            FirstName = "George",
-                            LastName = "Russell",
-                            RoleId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc")
-                        });
+            modelBuilder.Entity("N2J.Infrastructure.Persistence.Audit.ChangeLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ChangedBy")
+                        .HasMaxLength(255)
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChangesJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_ChangeLog");
+
+                    b.HasIndex(new[] { "ChangeType" }, "IX_ChangeLog_ChangeType");
+
+                    b.HasIndex(new[] { "ChangedAt" }, "IX_ChangeLog_ChangedAt");
+
+                    b.HasIndex(new[] { "ChangedBy" }, "IX_ChangeLog_ChangedBy");
+
+                    b.HasIndex(new[] { "EntityId" }, "IX_ChangeLog_EntityId");
+
+                    b.HasIndex(new[] { "EntityName" }, "IX_ChangeLog_EntityName");
+
+                    b.ToTable("ChangeLogs", (string)null);
                 });
 
             modelBuilder.Entity("N2J.Domain.Entities.Expense", b =>

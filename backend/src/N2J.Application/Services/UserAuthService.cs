@@ -106,7 +106,7 @@ public class UserAuthService : IUserAuthService
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
 
-        var roleName = user.Role?.Name ?? "User";
+        var roleName = user.Role?.Name ?? AppConstants.EmployeeRole;
 
         var claims = new List<Claim>
         {
