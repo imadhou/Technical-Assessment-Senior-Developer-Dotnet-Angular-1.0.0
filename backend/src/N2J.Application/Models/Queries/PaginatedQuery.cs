@@ -35,10 +35,4 @@ public class PaginatedQuery
     /// <example>false</example>
     [DefaultValue(false)]
     public bool IsDescending { get; set; } = false;
-
-    [JsonIgnore]
-    public int Take => PageSize;
-
-    [JsonIgnore]
-    public int Skip => (Page - 1) * PageSize;
 }

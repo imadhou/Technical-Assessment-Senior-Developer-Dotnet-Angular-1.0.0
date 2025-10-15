@@ -43,13 +43,6 @@ namespace N2J.Application.Validators
                 .MaximumLength(50).WithMessage("Last name cannot exceed 50 characters")
                 .Matches(@"^[a-zA-Z\s\-'\.]+$").WithMessage("Last name can only contain letters, spaces, hyphens, apostrophes, and periods")
                 .Must(NotContainNumbersOrSpecialChars).WithMessage("Last name cannot contain numbers or special characters");
-
-            // CompanyId validation (optional)
-            When(x => x.CompanyId.HasValue, () =>
-            {
-                RuleFor(x => x.CompanyId)
-                    .NotEqual(Guid.Empty).WithMessage("Company ID must be a valid GUID");
-            });
         }
 
         private bool BeAValidDomain(string email)

@@ -27,7 +27,12 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
         return await query.AsTracking().FirstOrDefaultAsync(e => e.Id == id);
     }
 
-    public async Task<IEnumerable<Expense>> GetAllAsync(IEnumerable<Expression<Func<Expense, bool>>> predicates, Expression<Func<Expense, object>> orderBy, int take, int skip, params Expression<Func<Expense, object>>[] includes)
+    public async Task<ICollection<Expense>> GetAllAsync(
+        ICollection<Expression<Func<Expense, bool>>> predicates,
+        Expression<Func<Expense, object>> orderBy,
+        int take,
+        int skip,
+        params Expression<Func<Expense, object>>[] includes)
     {
         IQueryable<Expense> query = _dbSet.AsQueryable();
         foreach (var include in includes)
@@ -44,4 +49,26 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
         return expenses;
     }
 
+    public async Task<(ICollection<Expense> Items, int TotalCount)> GetAllWithCountAsync(
+        ICollection<Expression<Func<Expense, bool>>> predicates,
+        Expression<Func<Expense, object>> orderBy,
+        int take,
+        int skip,
+        params Expression<Func<Expense, object>>[] includes)
+    {
+        IQueryable<Expense> query = _dbSet.AsQueryable();
+        foreach (var include in includes)
+            query = query.Include(include);
+        foreach (var predicate in predicates)
+            query = query.Where(predicate);
+        if (orderBy != null)
+            query = query.OrderBy(orderBy);
+        if (skip > 0)
+            query = query.Skip(skip);
+        if (take > 0)
+            query = query.Take(take);
+        var totalCount = await query.CountAsync();
+        List<Expense> expenses = await query.AsNoTracking().ToListAsync();
+        return (expenses, totalCount);
+    }
 }

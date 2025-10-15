@@ -1,3 +1,6 @@
+using N2J.Application.Models.Dtos.Expense;
+using N2J.Application.Models.Dtos.UserAuth;
+
 namespace N2J.Application.Models.Dtos;
 
 public class ExpenseDto
@@ -17,7 +20,7 @@ public class ExpenseDto
     /// <summary>
     /// Expense category identifier.
     /// </summary>
-    public Guid CategoryId { get; set; }
+    public Guid ExpenseCategoryId { get; set; }
     /// <summary>
     /// Expense user identifier.
     /// </summary>
@@ -29,7 +32,7 @@ public class ExpenseDto
     /// <summary>
     /// Expense status (Pending, Approved, Rejected).
     /// </summary>
-    public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected
+    public string Status { get; set; } = "Pending";
     /// <summary>
     /// Expense receipt URL.
     /// </summary>
@@ -43,6 +46,8 @@ public class ExpenseDto
     /// </summary>
     public DateTime? UpdatedAt { get; set; }
 
-    public ExpenseCategoryDto Category { get; set; } = null!;
+    public ExpenseCategoryDto ExpenseCategory { get; set; } = null!;
     public UserDto User { get; set; } = null!;
+
+    public List<LinkDto> Links { get; set; } = new List<LinkDto>();
 }

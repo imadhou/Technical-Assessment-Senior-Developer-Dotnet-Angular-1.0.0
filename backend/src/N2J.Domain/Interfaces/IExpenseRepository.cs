@@ -27,7 +27,29 @@ public interface IExpenseRepository: IRepository<Expense>
     /// <param name="take">The maximum number of entities to retrieve. Must be a non-negative integer.</param>
     /// <param name="skip">The number of entities to skip before starting to retrieve results. Must be a non-negative integer.</param>
     /// <param name="includes">An optional array of expressions specifying related entities to include in the query results.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains an <see cref="IEnumerable{T}"/> of
+    /// <returns>A task that represents the asynchronous operation. The task result contains an <see cref="ICollection{T}"/> of
     /// <see cref="Expense"/> entities that match the specified criteria.</returns>
-    Task<IEnumerable<Expense>> GetAllAsync(IEnumerable<Expression<Func<Expense, bool>>> predicates, Expression<Func<Expense, object>> orderBy, int take, int skip, params Expression<Func<Expense, object>>[] includes);
+    Task<ICollection<Expense>> GetAllAsync(
+        ICollection<Expression<Func<Expense, bool>>> predicates, 
+        Expression<Func<Expense, object>> orderBy, 
+        int take, 
+        int skip, 
+        params Expression<Func<Expense, object>>[] includes);
+
+    /// <summary>
+    /// Get All with totalCount
+    /// </summary>
+    /// <param name="predicates"></param>
+    /// <param name="orderBy"></param>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    Task<(ICollection<Expense> Items, int TotalCount)> GetAllWithCountAsync(
+        ICollection<Expression<Func<Expense, bool>>> predicates,
+        Expression<Func<Expense, object>> orderBy,
+        int take,
+        int skip,
+        params Expression<Func<Expense, object>>[] includes);
+
 }

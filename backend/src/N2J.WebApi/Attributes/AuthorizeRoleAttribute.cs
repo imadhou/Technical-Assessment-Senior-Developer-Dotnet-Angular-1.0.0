@@ -16,7 +16,7 @@ public class AuthorizeRoleAttribute : ActionFilterAttribute
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         // Check if user is authenticated
-        if (!context.HttpContext.User.Identity.IsAuthenticated)
+        if (!context.HttpContext.User.Identity!.IsAuthenticated)
         {
             context.Result = new UnauthorizedObjectResult(new
             {

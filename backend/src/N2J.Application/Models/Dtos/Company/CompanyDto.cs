@@ -1,4 +1,4 @@
-﻿namespace N2J.Application.Models.Dtos;
+﻿namespace N2J.Application.Models.Dtos.Company;
 
 public class CompanyDto
 {
@@ -9,7 +9,4 @@ public class CompanyDto
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
-    // Navigation properties
-    public ICollection<UserDto> Users { get; set; } = new List<UserDto>();
-    public ICollection<ExpenseCategoryDto> Categories { get; set; } = new List<ExpenseCategoryDto>();
 }

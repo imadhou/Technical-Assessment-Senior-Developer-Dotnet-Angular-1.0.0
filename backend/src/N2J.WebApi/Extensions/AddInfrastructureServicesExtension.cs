@@ -9,6 +9,7 @@ namespace N2J.WebApi.Extensions
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
             services.AddScoped<IExpenseRepository, ExpenseRepository>();
+            services.AddScoped<IExpenceCategoryRepository, ExpenseCategoryRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IChangeLogRepository, ChangeLogRepository>();

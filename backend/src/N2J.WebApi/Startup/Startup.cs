@@ -115,13 +115,13 @@ public class Startup
         _app.MapControllers();
 
         // Health check endpoint
-        _app.MapHealthChecks("/health");
+        _app.MapHealthChecks("/health").ExcludeFromDescription();
 
         // Test endpoints to generate traffic for metrics
-        _app.MapGet("/api/test", () => new { message = "Test API", timestamp = DateTime.UtcNow });
-        _app.MapGet("/api/health", () => new { status = "Healthy", service = "WebApi" });
+        _app.MapGet("/api/test", () => new { message = "Test API", timestamp = DateTime.UtcNow }).ExcludeFromDescription();
+        _app.MapGet("/api/health", () => new { status = "Healthy", service = "WebApi" }).ExcludeFromDescription();
 
-        _app.MapGet("/", () => Results.Redirect("/swagger"));
+        _app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
     }
 
 

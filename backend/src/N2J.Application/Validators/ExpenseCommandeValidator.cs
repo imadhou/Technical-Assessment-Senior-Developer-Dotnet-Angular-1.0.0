@@ -25,10 +25,15 @@ public class ExpenseCommandValidator : AbstractValidator<ExpenseCommand>
             .PrecisionScale(18, 2, false).WithMessage("Amount cannot have more than 2 decimal places")
             .Must(BeAReasonableAmount).WithMessage("Amount appears to be unreasonable for an expense");
 
-        // CategoryId validation
+        // ExpenseCategoryId validation
         RuleFor(x => x.ExpenseCategoryId)
-            .NotEmpty().WithMessage("Category is required")
-            .NotEqual(Guid.Empty).WithMessage("Category must be a valid selection");
+            .NotEmpty().WithMessage("ExpenseCategoryId is required")
+            .NotEqual(Guid.Empty).WithMessage("ExpenseCategoryId must be a valid selection");
+
+        // UserId validation
+        RuleFor(x => x.UserId)
+            .NotEmpty().WithMessage("UserId is required")
+            .NotEqual(Guid.Empty).WithMessage("UserId must be a valid selection");
 
         // Date validation
         RuleFor(x => x.Date)

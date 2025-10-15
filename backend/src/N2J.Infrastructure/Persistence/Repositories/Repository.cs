@@ -57,12 +57,12 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
         return await _dbSet.AnyAsync(predicate);
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync()
+    public async Task<ICollection<TEntity>> GetAllAsync()
     {
         return await _dbSet.AsNoTracking().ToListAsync();
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Expression<Func<TEntity, bool>>> predicates)
+    public async Task<ICollection<TEntity>> GetAllAsync(ICollection<Expression<Func<TEntity, bool>>> predicates)
     {
         IQueryable<TEntity> query = _dbSet.AsNoTracking();
 

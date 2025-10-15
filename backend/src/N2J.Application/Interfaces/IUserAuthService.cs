@@ -9,4 +9,5 @@ public interface IUserAuthService
     Task<AuthResponseDto> LoginAsync(LoginCommand command);
     Task<string> HashPasswordAsync(string password);
     Task<bool> VerifyPasswordAsync(string password, string passwordHash);
+    Task<UserDto> GetUserByIdAsync(Guid id);
 }

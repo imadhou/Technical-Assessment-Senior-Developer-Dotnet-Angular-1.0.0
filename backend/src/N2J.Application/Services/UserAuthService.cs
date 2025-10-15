@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using N2J.Application.Interfaces;
 using N2J.Application.Models.Commands.UserAuth;
 using N2J.Application.Models.Constants;
+using N2J.Application.Models.Dtos;
 using N2J.Application.Models.Dtos.UserAuth;
+using N2J.Application.Models.Exceptions;
 using N2J.Domain.Entities;
 using N2J.Domain.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,16 +23,19 @@ public class UserAuthService : IUserAuthService
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
     private readonly JwtSettings _jwtSettings;
+    private readonly IMapper _userMapper;
 
 
     public UserAuthService(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
-        IOptions<JwtSettings> jwtSettings)
+        IOptions<JwtSettings> jwtSettings,
+        IMapper userMapper)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
         _jwtSettings = jwtSettings.Value;
+        _userMapper = userMapper;
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginCommand request)
@@ -50,19 +56,29 @@ public class UserAuthService : IUserAuthService
         return token;
     }
 
+    public async Task<UserDto> GetUserByIdAsync(Guid id)
+    {
+        var user = await _userRepository.GetByIdAsync(id);
+        if (user == null)
+        {
+            throw new EntityNotFoundException("User not found");
+        }
+        return _userMapper.Map<UserDto>(user);
+    }   
+
     public async Task<AuthResponseDto> RegisterAsync(RegisterCommand request)
     {
         var existingUser = await _userRepository.GetByEmailAsync(request.Email);
         if (existingUser != null)
         {
-            throw new InvalidOperationException("User with this email already exists");
+            throw new UserAuthException("User with this email already exists");
         }
 
         // Get default role (you might want to make this configurable)
         var defaultRole = await _roleRepository.GetByNameAsync(AppConstants.EmployeeRole);
         if (defaultRole == null)
         {
-            throw new InvalidOperationException("Default role not found");
+            throw new UserAuthException("Default role not found");
         }
 
         string passwordHash = await HashPasswordAsync(request.Password);
@@ -73,7 +89,7 @@ public class UserAuthService : IUserAuthService
             PasswordHash = passwordHash,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            CompanyId = request.CompanyId ?? AppConstants.DefaultCompanyId,
+            CompanyId = AppConstants.DefaultCompanyId,
             RoleId = defaultRole.Id,
             CreatedAt = DateTime.UtcNow
         };

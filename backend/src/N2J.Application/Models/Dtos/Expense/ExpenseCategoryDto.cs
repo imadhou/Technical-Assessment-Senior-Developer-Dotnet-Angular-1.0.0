@@ -1,4 +1,4 @@
-﻿namespace N2J.Application.Models.Dtos;
+﻿namespace N2J.Application.Models.Dtos.Expense;
 
 public class ExpenseCategoryDto
 {

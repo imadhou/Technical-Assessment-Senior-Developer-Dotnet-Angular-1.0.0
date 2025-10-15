@@ -1,4 +1,6 @@
-﻿namespace N2J.Application.Models.Dtos;
+﻿using N2J.Application.Models.Dtos.Company;
+
+namespace N2J.Application.Models.Dtos.UserAuth;
 
 public class UserDto
 {

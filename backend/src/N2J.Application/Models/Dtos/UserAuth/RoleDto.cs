@@ -1,4 +1,4 @@
-﻿namespace N2J.Application.Models.Dtos;
+﻿namespace N2J.Application.Models.Dtos.UserAuth;
 
 public class RoleDto
 {

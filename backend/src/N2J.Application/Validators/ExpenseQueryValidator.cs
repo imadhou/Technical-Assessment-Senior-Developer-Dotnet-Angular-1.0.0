@@ -48,6 +48,18 @@ public class ExpenseQueryValidator : AbstractValidator<ExpenseQuery>
             .Must(x => !x.ToDate.HasValue || !x.FromDate.HasValue || x.ToDate >= x.FromDate)
             .WithMessage("ToDate must be greater than or equal to FromDate");
 
+        RuleFor(x => x.Status)
+            .MaximumLength(50).When(x => !string.IsNullOrEmpty(x.Status))
+            .WithMessage("Status filter cannot exceed 50 characters");
+
+        RuleFor(x => x.ExpenseCategoryId)
+            .NotEqual(Guid.Empty).When(x => x.ExpenseCategoryId.HasValue)
+            .WithMessage("ExpenseCategoryId must be a valid GUID");
+
+        RuleFor(x => x.UserId)
+            .NotEqual(Guid.Empty).When(x => x.UserId.HasValue)
+            .WithMessage("UserId must be a valid GUID");
+
         // SortBy validation
         RuleFor(x => x.SortBy)
             .Must(BeAValidSortProperty)

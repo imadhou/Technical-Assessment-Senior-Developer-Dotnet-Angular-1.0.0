@@ -2,6 +2,8 @@
 using N2J.Domain.Entities;
 using N2J.Application.Models.Dtos;
 using N2J.Application.Models.Commands;
+using N2J.Application.Models.Dtos.Expense;
+using N2J.Application.Models.Dtos.UserAuth;
 
 namespace N2J.Application.Mappers;
 

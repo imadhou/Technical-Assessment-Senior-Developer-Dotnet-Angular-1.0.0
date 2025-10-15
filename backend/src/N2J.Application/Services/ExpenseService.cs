@@ -2,6 +2,7 @@
 using N2J.Application.Interfaces;
 using N2J.Application.Models.Commands;
 using N2J.Application.Models.Dtos;
+using N2J.Application.Models.Exceptions;
 using N2J.Application.Models.Queries;
 using N2J.Domain.Entities;
 using N2J.Domain.Interfaces;
@@ -13,19 +14,23 @@ public class ExpenseService: IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly IMapper _mapper;
+    private readonly IExpenceCategoryRepository _expenceCategoryRepository;
+    private readonly IUserRepository _userRepository;
 
-    public ExpenseService(IExpenseRepository expenseRepository, IMapper mapper)
+    public ExpenseService(IExpenseRepository expenseRepository, IMapper mapper, IExpenceCategoryRepository expenceCategoryRepository, IUserRepository userRepository)
     {
         _expenseRepository = expenseRepository;
         _mapper = mapper;
+        _expenceCategoryRepository = expenceCategoryRepository;
+        _userRepository = userRepository;
     }
 
-    public async Task<ExpenseDto> UpdateExpenseStatus(Guid expenseId, string newStatus, Guid updatedBy)
+    public async Task<ExpenseDto> UpdateExpenseStatusAsync(Guid expenseId, string newStatus, Guid updatedBy)
     {
         var expense = await _expenseRepository.GetByIdAsync(expenseId);
         if (expense == null)
         {
-            throw new KeyNotFoundException($"Expense with ID {expenseId} not found.");
+            throw new EntityNotFoundException("Expnese not found");
         }
 
         expense.Status = newStatus;
@@ -36,13 +41,25 @@ public class ExpenseService: IExpenseService
         return _mapper.Map<ExpenseDto>(expense);
     }
 
-    public async Task<ExpenseDto> UpdateExpense(Guid expenseId, ExpenseCommand expenseCommand, Guid updatedBy)
+    public async Task<ExpenseDto> UpdateExpenseAsync(Guid expenseId, ExpenseCommand expenseCommand, Guid updatedBy)
     {
         var expense = await _expenseRepository.GetByIdAsync(expenseId);
 
         if (expense == null)
         {
-            throw new KeyNotFoundException($"Expense with ID {expenseId} not found.");
+            throw new EntityNotFoundException($"Expense not found.");
+        }
+
+        var expenseCategory = await _expenceCategoryRepository.GetByIdAsync(expenseCommand.ExpenseCategoryId);
+        if (expenseCategory == null)
+        {
+            throw new ReferenceNotFoundException($"Expense category with ID {expenseCommand.ExpenseCategoryId} not found.");
+        }
+
+        var expenseUser = await _userRepository.GetByIdAsync(expenseCommand.UserId);
+        if (expenseUser == null)
+        {
+            throw new ReferenceNotFoundException($"User with ID {expenseCommand.UserId} not found.");
         }
 
         expense = _mapper.Map(expenseCommand, expense);
@@ -53,9 +70,21 @@ public class ExpenseService: IExpenseService
         return _mapper.Map<ExpenseDto>(expense);
     }
 
-    public async Task<ExpenseDto> CreateExpense(ExpenseCommand expenseCommand, Guid createdBy)
+    public async Task<ExpenseDto> CreateExpenseAsync(ExpenseCommand expenseCommand, Guid createdBy)
     {
-        expenseCommand.UserId = expenseCommand.UserId ?? createdBy;
+        var expenseCategory = await _expenceCategoryRepository.GetByIdAsync(expenseCommand.ExpenseCategoryId);
+        if (expenseCategory == null)
+        {
+            throw new ReferenceNotFoundException($"Expense category with ID {expenseCommand.ExpenseCategoryId} not found.");
+        }
+
+        var expenseUser = await _userRepository.GetByIdAsync(expenseCommand.UserId);
+        if (expenseUser == null)
+        {
+            throw new ReferenceNotFoundException($"User with ID {expenseCommand.UserId} not found.");
+        }
+
+        expenseCommand.UserId = expenseCommand.UserId;
         Expense expense = _mapper.Map<Expense>(expenseCommand);
         expense.CreatedBy = createdBy;
         expense.CreatedAt = DateTime.UtcNow;
@@ -67,7 +96,7 @@ public class ExpenseService: IExpenseService
 
 
 
-    public async Task<IEnumerable<ExpenseDto>> GetAll(ExpenseQuery query)
+    public async Task<ICollection<ExpenseDto>> GetAllAsync(ExpenseQuery query)
     {
         var predicates = BuildPredicates(query);
         var orderBy = GetOrderByExpression(query);
@@ -80,20 +109,37 @@ public class ExpenseService: IExpenseService
             e => e.ExpenseCategory,
             e => e.User
         );
-        var expenseDtos = _mapper.Map<IEnumerable<ExpenseDto>>(expenses);
+        var expenseDtos = _mapper.Map<ICollection<ExpenseDto>>(expenses);
 
         return expenseDtos;
     }
 
-    public async Task<ExpenseDto?> GetById(Guid id)
+    public async Task<(ICollection<ExpenseDto> Items, int TotalCount)> GetAllWithCountAsync(ExpenseQuery query)
+    {
+        var predicates = BuildPredicates(query);
+        var orderBy = GetOrderByExpression(query);
+
+        var expenses = await _expenseRepository.GetAllWithCountAsync(
+            predicates: predicates,
+            orderBy: orderBy,
+            take: query.PageSize,
+            skip: (query.Page - 1) * query.PageSize,
+            e => e.ExpenseCategory,
+            e => e.User
+        );
+        var expenseDtos = _mapper.Map<ICollection<ExpenseDto>>(expenses.Items);
+        return (expenseDtos, expenses.TotalCount);
+    }
+
+    public async Task<ExpenseDto?> GetByIdAsync(Guid id)
     { 
-        var expense = await _expenseRepository.GetByIdAsync(id);
+        var expense = await _expenseRepository.GetByIdAsync(id, e => e.ExpenseCategory, e => e.User);
         if (expense == null) return null;
         var expenseDto = _mapper.Map<ExpenseDto>(expense);
         return expenseDto;
     }
 
-    private IEnumerable<Expression<Func<Expense, bool>>> BuildPredicates(ExpenseQuery query)
+    private ICollection<Expression<Func<Expense, bool>>> BuildPredicates(ExpenseQuery query)
     {
         var predicates = new List<Expression<Func<Expense, bool>>>();
 
@@ -126,6 +172,12 @@ public class ExpenseService: IExpenseService
         {
             predicates.Add(e => e.Date <= query.ToDate.Value.Date);
         }
+
+        if (query.UserId.HasValue)
+        {
+            predicates.Add(e => e.UserId == query.UserId);
+        }
+
 
         return predicates;
     }

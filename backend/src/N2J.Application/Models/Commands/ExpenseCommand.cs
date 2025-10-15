@@ -33,6 +33,6 @@ namespace N2J.Application.Models.Commands
         /// <summary>
         /// User identifier who incurred the expense.
         /// </summary>
-        public Guid? UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

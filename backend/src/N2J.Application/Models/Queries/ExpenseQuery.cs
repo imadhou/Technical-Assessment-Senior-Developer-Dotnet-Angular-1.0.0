@@ -44,4 +44,16 @@ public class ExpenseQuery : PaginatedQuery
     /// </summary>
     /// <example>12345678-1234-1234-1234-123456789abc</example>
     public Guid? ExpenseCategoryId { get; set; }
+
+    /// <summary>
+    /// Filter by expense user ID
+    /// </summary>
+    /// <example>12345678-1234-1234-1234-123456789abc</example>
+    public Guid? UserId { get; set; }
+
+    /// <summary>
+    /// Filter by expense status (e.g., "Pending", "Approved", "Rejected")
+    /// </summary>
+    /// <example>Approved</example>
+    public string? Status { get; set; }
 }
