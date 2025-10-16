@@ -160,6 +160,33 @@ public class ExpenseController : ControllerBase
         }
     }
 
+    [HttpDelete("{id:guid}")]
+    [AuthorizeRole(AppConstants.ManagerRole, AppConstants.EmployeeRole)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteExpense([FromRoute] Guid id)
+    {
+        try
+        {
+            var contextUser = User.ToUserContext();
+            await _expenseService.DeleteExpenseAsync(id, contextUser.CompanyId);
+            return NoContent();
+        }
+        catch (EntityNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Expense not found while deleting expense with ID {ExpenseId}", id);
+            return NotFound(new { Message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access while deleting expense with ID {ExpenseId}", id);
+            return Forbid();
+        }
+    }
+
     [HttpGet]
     [AuthorizeRole(AppConstants.ManagerRole, AppConstants.EmployeeRole)]
     [ProducesResponseType(typeof(ExpenseCollectionDto), StatusCodes.Status200OK)]

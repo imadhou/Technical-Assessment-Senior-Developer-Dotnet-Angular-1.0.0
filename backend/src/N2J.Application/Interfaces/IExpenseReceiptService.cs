@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace N2J.Application.Interfaces
 {
-    public interface IReceiptService
+    public interface IExpenseReceiptService
     {
         Task<ReceiptDto> UploadReceiptAsync(FileUploadCommand command, Guid userId);
         Task<Stream> DownloadReceiptAsync(Guid expenseId, Guid userId);

@@ -52,6 +52,7 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
     public async Task<(ICollection<Expense> Items, int TotalCount)> GetAllWithCountAsync(
         ICollection<Expression<Func<Expense, bool>>> predicates,
         Expression<Func<Expense, object>> orderBy,
+        bool isDescending,
         int take,
         int skip,
         params Expression<Func<Expense, object>>[] includes)
@@ -61,7 +62,9 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
             query = query.Include(include);
         foreach (var predicate in predicates)
             query = query.Where(predicate);
-        if (orderBy != null)
+        if (orderBy != null && isDescending)
+            query = query.OrderByDescending(orderBy);
+        if (orderBy != null && !isDescending)
             query = query.OrderBy(orderBy);
         if (skip > 0)
             query = query.Skip(skip);

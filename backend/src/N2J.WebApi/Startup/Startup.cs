@@ -71,6 +71,11 @@ public class Startup
     private void ConfigureInfrastructure()
     {
         _builder.AddRedisClient("cache");
+        _builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = _builder.Configuration.GetConnectionString("cache");
+        });
+
         _builder.AddNpgsqlDbContext<AppDbContext>("database");
         _builder.AddAzureBlobServiceClient("blobs");
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using N2J.Application.Interfaces;
 using N2J.Application.Models.Commands;
 using N2J.Application.Models.Dtos.Expense;
+using N2J.WebApi.Controllers;
 using N2J.WebApi.Extensions;
 
 namespace N2J.Application.Controllers;
@@ -12,13 +13,15 @@ namespace N2J.Application.Controllers;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/expenses-receipt")]
 [Produces("application/json")]
-public class ReceiptsController : ControllerBase
+public class ExpenseReceiptsController : ControllerBase
 {
-    private readonly IReceiptService _receiptService;
+    private readonly IExpenseReceiptService _receiptService;
+    private readonly ILogger<ExpenseReceiptsController> _logger;
 
-    public ReceiptsController(IReceiptService receiptService)
+    public ExpenseReceiptsController(IExpenseReceiptService receiptService, ILogger<ExpenseReceiptsController> logger)
     {
         _receiptService = receiptService;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -36,15 +39,13 @@ public class ReceiptsController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
+            _logger.LogWarning(ex, "Unauthorized access while uploading receipt for expense {ExpenseId}", request.ExpenseId);
             return NotFound(new { message = ex.Message });
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning(ex, "Invalid file upload attempt for expense {ExpenseId}", request.ExpenseId);
             return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "An error occurred while uploading the receipt." });
         }
     }
 
@@ -63,11 +64,13 @@ public class ReceiptsController : ControllerBase
         }
         catch (FileNotFoundException)
         {
+            _logger.LogWarning("Receipt not found for expense {ExpenseId}", expenseId);
             return NotFound(new { message = "Receipt not found" });
         }
         catch (UnauthorizedAccessException)
         {
-            return NotFound(new { message = "Receipt not found" }); // Don't reveal existence
+            _logger.LogWarning("Unauthorized access while downloading receipt for expense {ExpenseId}", expenseId);
+            return NotFound(new { message = "Receipt not found" });
         }
     }
 
@@ -86,6 +89,7 @@ public class ReceiptsController : ControllerBase
         }
         catch (UnauthorizedAccessException)
         {
+            _logger.LogWarning("Unauthorized access while deleting receipt for expense {ExpenseId}", expenseId);
             return NotFound();
         }
     }

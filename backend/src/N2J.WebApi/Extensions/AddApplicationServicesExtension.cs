@@ -20,7 +20,8 @@ namespace N2J.WebApi.Extensions
             services.AddScoped<IExpenseService, ExpenseService>();
             services.AddScoped<IUserAuthService, UserAuthService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
-            services.AddScoped<IReceiptService, ReceiptService>();
+            services.AddScoped<IExpenseReceiptService, ExpenseReceiptService>();
+            services.AddScoped<IRedisCacheService, RedisCacheService>();
 
             return services;
         }

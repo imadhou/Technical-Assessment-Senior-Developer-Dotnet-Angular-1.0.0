@@ -41,6 +41,7 @@ public interface IExpenseRepository: IRepository<Expense>
     /// </summary>
     /// <param name="predicates"></param>
     /// <param name="orderBy"></param>
+    /// <param name="isDescending"></param>
     /// <param name="take"></param>
     /// <param name="skip"></param>
     /// <param name="includes"></param>
@@ -48,6 +49,7 @@ public interface IExpenseRepository: IRepository<Expense>
     Task<(ICollection<Expense> Items, int TotalCount)> GetAllWithCountAsync(
         ICollection<Expression<Func<Expense, bool>>> predicates,
         Expression<Func<Expense, object>> orderBy,
+        bool isDescending,
         int take,
         int skip,
         params Expression<Func<Expense, object>>[] includes);

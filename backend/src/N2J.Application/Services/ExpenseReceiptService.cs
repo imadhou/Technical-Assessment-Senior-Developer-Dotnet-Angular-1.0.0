@@ -5,32 +5,23 @@ using N2J.Application.Models.Commands;
 using N2J.Application.Models.Configs;
 using N2J.Application.Models.Dtos.Expense;
 using N2J.Application.Models.Exceptions;
-using N2J.Domain.Entities;
 using N2J.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace N2J.Application.Services
 {
-    public class ReceiptService : IReceiptService
+    public class ExpenseReceiptService : IExpenseReceiptService
     {
         private readonly IFileStorageService _fileStorageService;
         private readonly IExpenseRepository _expenseRepository;
-        private readonly IUserRepository _userRepository;
         private readonly FileStorageOptions _options;
 
-        public ReceiptService(
+        public ExpenseReceiptService(
             IFileStorageService fileStorageService,
             IExpenseRepository expenseRepository,
-            IUserRepository userRepository,
             IOptions<FileStorageOptions> options)
         {
             _fileStorageService = fileStorageService;
             _expenseRepository = expenseRepository;
-            _userRepository = userRepository;
             _options = options.Value;
         }
 

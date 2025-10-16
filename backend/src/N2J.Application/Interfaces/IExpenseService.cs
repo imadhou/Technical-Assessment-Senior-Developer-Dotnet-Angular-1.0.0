@@ -11,6 +11,7 @@ public interface IExpenseService
     Task<ExpenseDto?> GetByIdAsync(Guid id);
     Task<ExpenseDto> CreateExpenseAsync(ExpenseCommand expenseCommand, Guid createdBy, Guid companyId);
     Task<ExpenseDto> UpdateExpenseAsync(Guid expenseId, ExpenseCommand expenseCommand, Guid updatedBy, Guid companyId);
-    Task<ExpenseDto> UpdateExpenseStatusAsync(Guid expenseId, string newStatus, Guid updatedBy, Guid companyId  );
+    Task<ExpenseDto> UpdateExpenseStatusAsync(Guid expenseId, string newStatus, Guid updatedBy, Guid companyId);
+    Task DeleteExpenseAsync(Guid expenseId, Guid companyId);
 
 }
