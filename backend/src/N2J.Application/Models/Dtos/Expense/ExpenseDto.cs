@@ -38,6 +38,21 @@ public class ExpenseDto
     /// </summary>
     public string? ReceiptUrl { get; set; }
     /// <summary>
+    /// Receipt file name.
+    /// </summary>
+    public string? ReceiptFileName { get; set; }
+
+    /// <summary>
+    /// Size of the receipt file in bytes.
+    /// </summary>
+    public long? ReceiptFileSize { get; set; }
+
+    /// <summary>
+    /// Receipt upload date in UTC.
+    /// </summary>
+    public DateTime? ReceiptUploadedAt { get; set; }
+
+    /// <summary>
     /// Expense creation date in UTC.
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

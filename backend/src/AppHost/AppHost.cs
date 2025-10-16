@@ -13,10 +13,14 @@ var mainDatabase = postgres.AddDatabase("database");
 var cache = builder.AddRedis("cache")
     .WithRedisCommander();
 
+var blobs = builder.AddAzureStorage("storage")
+                   .RunAsEmulator()
+                   .AddBlobs("blobs");
 // API with full telemetry
 var webapi = builder.AddProject<Projects.N2J_WebApi>("webapi")
     .WithReference(cache)
     .WithReference(mainDatabase)
+    .WithReference(blobs)
     .WithOtlpExporter()
     .WithEnvironment("OTEL_SERVICE_NAME", "webapi")
     // For Exception details
@@ -29,7 +33,8 @@ var webapi = builder.AddProject<Projects.N2J_WebApi>("webapi")
     .WithEnvironment("JwtSettings__Audience", jwtSettings["Audience"])
     .WithEnvironment("JwtSettings__ExpirationMinutes", jwtSettings["ExpirationMinutes"])
     .WaitFor(postgres)
-    .WaitFor(cache);
+    .WaitFor(cache)
+    .WaitFor(blobs);
 
 // Frontend
 var angular = builder.AddNpmApp("angular", "../../../frontend/", "start")

@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning.ApiExplorer;
+using N2J.Application.Models.Configs;
 using N2J.Infrastructure.DataSeeding;
 using N2J.Infrastructure.Persistence;
 using N2J.WebApi.Extensions;
@@ -71,6 +72,10 @@ public class Startup
     {
         _builder.AddRedisClient("cache");
         _builder.AddNpgsqlDbContext<AppDbContext>("database");
+        _builder.AddAzureBlobServiceClient("blobs");
+
+        _builder.Services.Configure<FileStorageOptions>(
+        _builder.Configuration.GetSection("FileStorage"));
     }
 
     private void ConfigureServices()

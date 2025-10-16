@@ -38,8 +38,6 @@ internal sealed class ExpenseEntityTypeConfiguration : IEntityTypeConfiguration<
             .HasMaxLength(50)
             .HasDefaultValue("Pending");
 
-        builder.Property(e => e.ReceiptUrl)
-            .HasMaxLength(2048);
 
         builder.Property(e => e.CreatedAt)
             .IsRequired()
@@ -54,6 +52,17 @@ internal sealed class ExpenseEntityTypeConfiguration : IEntityTypeConfiguration<
 
         builder.Property(e => e.UpdatedBy)
             .HasColumnType("uuid");
+
+        builder.Property(e => e.ReceiptUrl)
+            .HasMaxLength(2048);
+
+        builder.Property(e => e.ReceiptFileName)
+            .HasMaxLength(500);
+
+        builder.Property(e => e.ReceiptFileSize);
+
+        builder.Property(e => e.ReceiptUploadedAt);
+
 
         builder.Property(e => e.ExpenseCategoryId)
             .IsRequired();

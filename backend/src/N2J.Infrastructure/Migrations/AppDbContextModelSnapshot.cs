@@ -94,6 +94,16 @@ namespace N2J.Infrastructure.Migrations
                     b.Property<Guid>("ExpenseCategoryId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ReceiptFileName")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long?>("ReceiptFileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("ReceiptUploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ReceiptUrl")
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");

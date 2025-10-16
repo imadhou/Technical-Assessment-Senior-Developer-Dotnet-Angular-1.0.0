@@ -10,12 +10,16 @@ public class Expense
     public Guid UserId { get; set; }
     public DateTime Date { get; set; }
     public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected
-    public string? ReceiptUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
     public Guid CreatedBy { get; set; }
     public Guid? UpdatedBy { get; set; }
+
+    public string? ReceiptUrl { get; set; }
+    public string? ReceiptFileName { get; set; }
+    public long? ReceiptFileSize { get; set; }
+    public DateTime? ReceiptUploadedAt { get; set; }
 
     // Navigation properties
     public virtual ExpenseCategory ExpenseCategory { get; set; } = null!;
