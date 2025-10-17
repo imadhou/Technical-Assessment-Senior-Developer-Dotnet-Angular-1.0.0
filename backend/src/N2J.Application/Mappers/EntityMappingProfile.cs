@@ -4,6 +4,7 @@ using N2J.Application.Models.Dtos;
 using N2J.Application.Models.Commands;
 using N2J.Application.Models.Dtos.Expense;
 using N2J.Application.Models.Dtos.UserAuth;
+using N2J.Application.Models.Dtos.Company;
 
 namespace N2J.Application.Mappers;
 
@@ -17,7 +18,9 @@ public class EntityMappingProfile: Profile{
         CreateMap<Expense, ExpenseDto>();
         CreateMap<ExpenseCategory, ExpenseCategoryDto>();
         CreateMap<User, UserDto>();
+        CreateMap<Company, CompanyDto>();
         CreateMap<ExpenseCommand, Expense>();
+        CreateMap<Role, RoleDto>();
     }
 }
 

@@ -14,6 +14,7 @@ namespace N2J.WebApi.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IChangeLogRepository, ChangeLogRepository>();
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<DataSeeder>();
             return services;
         }

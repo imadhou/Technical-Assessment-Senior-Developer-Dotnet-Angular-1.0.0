@@ -1,11 +1,23 @@
+import { ExpenseCategory } from "./expense-category.model";
+import { Link } from "./link.model";
+import { User } from "./user.model";
+
 export interface Expense {
-  company_id: string;
+  id: string;
+  description?: string | null;
   amount: number;
   currency: string;
-  category: string;
-  date: string;
-  description: string;
-  employee_id: string;
-  created_at: string;
-  updated_at: string;
+  expenseCategoryId: string;
+  userId: string;
+  date: string; // ISO date string
+  status?: string | null;
+  receiptUrl?: string | null;
+  receiptFileName?: string | null;
+  receiptFileSize?: number | null;
+  receiptUploadedAt?: string | null; // ISO date string
+  createdAt: string; // ISO date string
+  updatedAt?: string | null; // ISO date string
+  expenseCategory: ExpenseCategory;
+  user: User;
+  links: Link[];
 }

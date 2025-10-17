@@ -33,6 +33,10 @@ internal sealed class ExpenseEntityTypeConfiguration : IEntityTypeConfiguration<
         builder.Property(e => e.Date)
             .IsRequired();
 
+        builder.Property(e => e.Currency)
+            .IsRequired()
+            .HasMaxLength(3);
+
         builder.Property(e => e.Status)
             .IsRequired()
             .HasMaxLength(50)

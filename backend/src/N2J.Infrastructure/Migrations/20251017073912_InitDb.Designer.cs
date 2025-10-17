@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace N2J.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251015215605_InitDataBase")]
-    partial class InitDataBase
+    [Migration("20251017073912_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,11 @@ namespace N2J.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
@@ -96,6 +101,16 @@ namespace N2J.Infrastructure.Migrations
 
                     b.Property<Guid>("ExpenseCategoryId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("ReceiptFileName")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long?>("ReceiptFileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("ReceiptUploadedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ReceiptUrl")
                         .HasMaxLength(2048)

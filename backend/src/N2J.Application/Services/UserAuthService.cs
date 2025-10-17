@@ -21,6 +21,7 @@ public class UserAuthService : IUserAuthService
 
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
+    private readonly ICompanyRepository _companyRepository;
     private readonly JwtSettings _jwtSettings;
     private readonly IMapper _userMapper;
 
@@ -28,11 +29,13 @@ public class UserAuthService : IUserAuthService
     public UserAuthService(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
+        ICompanyRepository companyRepository,
         IOptions<JwtSettings> jwtSettings,
         IMapper userMapper)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
+        _companyRepository = companyRepository;
         _jwtSettings = jwtSettings.Value;
         _userMapper = userMapper;
     }
@@ -57,7 +60,7 @@ public class UserAuthService : IUserAuthService
 
     public async Task<UserDto> GetUserByIdAsync(Guid id)
     {
-        var user = await _userRepository.GetByIdAsync(id);
+        var user = await _userRepository.GetFullByIdAsync(id);
         if (user == null)
         {
             throw new EntityNotFoundException("User not found");
@@ -74,10 +77,16 @@ public class UserAuthService : IUserAuthService
         }
 
         // Get default role (you might want to make this configurable)
-        var defaultRole = await _roleRepository.GetByNameAsync(AppConstants.EmployeeRole);
+        var defaultRole = await _roleRepository.GetByNameAsync(AppConstants.ManagerRole);
         if (defaultRole == null)
         {
             throw new UserAuthException("Default role not found");
+        }
+
+        var defaultComany = await _companyRepository.GetByNameAsync(AppConstants.DefaultCompanyName);
+        if (defaultComany == null)
+        {
+            throw new UserAuthException("Default company not found");
         }
 
         string passwordHash = await HashPasswordAsync(request.Password);
@@ -88,7 +97,7 @@ public class UserAuthService : IUserAuthService
             PasswordHash = passwordHash,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            CompanyId = AppConstants.DefaultCompanyId,
+            CompanyId = defaultComany.Id,
             RoleId = defaultRole.Id,
             CreatedAt = DateTime.UtcNow
         };

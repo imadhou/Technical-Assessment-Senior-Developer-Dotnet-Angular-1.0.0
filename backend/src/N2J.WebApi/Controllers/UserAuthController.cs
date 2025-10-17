@@ -2,13 +2,11 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using N2J.Application.Interfaces;
 using N2J.Application.Models.Commands.UserAuth;
 using N2J.Application.Models.Dtos.UserAuth;
 using N2J.Application.Models.Exceptions;
-using N2J.Application.Validators;
 using N2J.WebApi.Extensions; // Assuming you have validators
 
 namespace N2J.WebApi.Controllers;

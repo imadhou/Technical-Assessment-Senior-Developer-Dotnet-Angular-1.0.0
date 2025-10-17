@@ -1,5 +1,8 @@
 # Technical Assessment—Senior Developer / Staff Engineer
 
+<a href="./backend/README.md"> Backend Details</a>
+<a href="./frontend/README.md"> Frontend Details</a>
+
 ## Overview
 
 This technical assessment evaluates your ability
@@ -11,6 +14,12 @@ application that provides an intuitive user interface for expense management.
 **Technology Stack**: .NET 9.0, ASP.NET Core, Redis, C#, Angular
 
 ## Getting Started
+
+### Demo
+
+1. Once the app is running, create a new user account (you will get the Manager role)
+2. Once your account is created, log in and explore the expense management dashboard
+3. Create, view, and manage expenses using the provided UI
 
 ### Backend
 

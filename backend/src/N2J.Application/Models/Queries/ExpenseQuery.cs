@@ -40,6 +40,12 @@ public class ExpenseQuery : PaginatedQuery
     public decimal? MaxAmount { get; set; }
 
     /// <summary>
+    /// Currency of the expense (e.g., USD, EUR).
+    /// <example> USD </example>
+    /// </summary>
+    public string? Currency { get; set; }
+
+    /// <summary>
     /// Filter by expense category ID
     /// </summary>
     /// <example>12345678-1234-1234-1234-123456789abc</example>

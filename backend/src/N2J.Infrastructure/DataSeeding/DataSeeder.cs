@@ -103,7 +103,7 @@ public class DataSeeder
     {
         var companies = new List<Company>
         {
-            new() { Name = "TechCorp Solutions", Domain = "techcorp.com" },
+            new() { Name = "N2J", Domain = "n2j.fr" },
             new() { Name = "Global Finance Inc", Domain = "globalfinance.com" },
             new() { Name = "HealthCare Partners", Domain = "healthcarepartners.com" },
             new() { Name = "EduSystems International", Domain = "edusystems.edu" },
@@ -127,11 +127,16 @@ public class DataSeeder
         var allCategories = new Dictionary<Guid, List<ExpenseCategory>>();
         var baseCategories = new[]
         {
-            "Travel & Accommodation",
-            "Meals & Entertainment",
-            "Office Supplies",
-            "Software & Subscriptions",
-            "Training & Development"
+             "Office Supplies",
+             "Travel",
+             "Meals",
+             "Entertainment",
+             "Transportation",
+             "Accommodation",
+             "Software",
+             "Hardware",
+             "Marketing",
+             "Other"
         };
 
         foreach (var company in companies)
@@ -247,6 +252,8 @@ public class DataSeeder
             "International roaming charges"
         };
 
+        var currencies = new[] { "USD", "EUR", "GBP", "JPY", "CAD", "AUD" };
+
         foreach (var user in users)
         {
             var expenseCount = _faker.Random.Int(0, 15); // 0 to 15 expenses per user
@@ -259,6 +266,7 @@ public class DataSeeder
                 var expenseDate = DateTime.UtcNow.AddDays(-_faker.Random.Int(1, 90));
                 var status = GetWeightedStatus(user, expenseDate);
                 var description = _faker.PickRandom(expenseDescriptions);
+                var currency = _faker.PickRandom(currencies);
 
                 var expense = new Expense
                 {
@@ -268,6 +276,7 @@ public class DataSeeder
                     ExpenseCategoryId = category.Id,
                     UserId = user.Id,
                     Date = expenseDate,
+                    Currency = currency,
                     Status = status,
                     ReceiptUrl = _faker.Random.Bool(0.7f) ? $"https://receipts.example.com/{_faker.Random.Guid()}.pdf" : null,
                     CreatedAt = expenseDate.AddHours(_faker.Random.Int(1, 8)),

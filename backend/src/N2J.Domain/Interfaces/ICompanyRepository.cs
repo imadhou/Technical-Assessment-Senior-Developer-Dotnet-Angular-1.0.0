@@ -4,4 +4,5 @@ namespace N2J.Domain.Interfaces;
 
 public interface ICompanyRepository: IRepository<Company>
 {
+    Task<Company?> GetByNameAsync(string domain);
 }

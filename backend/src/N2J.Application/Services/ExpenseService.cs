@@ -189,11 +189,15 @@ public class ExpenseService: IExpenseService
         var groupKey = GetCompanyGroupKey(companyId);
 
         // Try to get from cache
-        var cachedResult = await _cacheService.GetAsync<(ICollection<ExpenseDto> Items, int TotalCount)>(cacheKey);
-        if (cachedResult.Items != null)
+        if (!string.IsNullOrEmpty(cacheKey))
         {
-            _logger.LogDebug("Cache hit for key: {CacheKey}", cacheKey);
-            return cachedResult;
+            var cachedResult = await _cacheService.GetAsync<(ICollection<ExpenseDto> Items, int TotalCount)>(cacheKey);
+            if (cachedResult.Items != null)
+            {
+                _logger.LogDebug("Cache hit for key: {CacheKey}", cacheKey);
+                return cachedResult;
+            }
+
         }
 
         var predicates = BuildPredicates(query, companyId);
@@ -212,8 +216,8 @@ public class ExpenseService: IExpenseService
         var result = (expenseDtos, expenses.TotalCount);
 
         // Cache the result and track the key
-        await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(15));
-        await _cacheService.AddKeyToGroupAsync(groupKey, cacheKey);
+        await _cacheService.SetAsync(cacheKey!, result, TimeSpan.FromMinutes(15));
+        await _cacheService.AddKeyToGroupAsync(groupKey, cacheKey!);
 
         return result;
     }
@@ -251,6 +255,16 @@ public class ExpenseService: IExpenseService
             predicates.Add(e => e.Amount <= query.MaxAmount.Value);
         }
 
+        if(query.Currency != null)
+        {
+            predicates.Add(e => e.Currency == query.Currency);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Status))
+        {
+            predicates.Add(e => e.Status == query.Status);
+        }
+
         if (query.FromDate.HasValue)
         {
             predicates.Add(e => e.Date >= query.FromDate.Value.Date);
@@ -284,28 +298,78 @@ public class ExpenseService: IExpenseService
     }
 
 
-    private string BuildCacheKey(ExpenseQuery query, Guid companyId)
+    private string? BuildCacheKey(ExpenseQuery query, Guid companyId)
     {
-        // Determine which cache key pattern to use based on query parameters
-        if (query.ExpenseCategoryId.HasValue && !string.IsNullOrEmpty(query.Status))
+        // Return null if any non-cacheable filters are applied
+        bool hasUncachedFilters =
+            !string.IsNullOrEmpty(query.Description) ||
+            query.FromDate.HasValue ||
+            query.ToDate.HasValue ||
+            query.MinAmount.HasValue ||
+            query.MaxAmount.HasValue ||
+            query.Currency != null;
+
+        if (hasUncachedFilters)
+        {
+            return null;
+        }
+
+        string sortBy = query.SortBy ?? "createdAt";
+
+        bool hasCategory = query.ExpenseCategoryId.HasValue;
+        bool hasStatus = !string.IsNullOrEmpty(query.Status);
+        bool hasUser = query.UserId.HasValue;
+
+        // Always include company in cache keys
+        if (hasCategory && hasStatus && hasUser)
+        {
+            return CacheKeys.ExpensesByCompanyCategoryStatusAndUser(
+                companyId, query.ExpenseCategoryId!.Value, query.Status!, query.UserId!.Value,
+                query.Page, query.PageSize, sortBy, query.IsDescending);
+        }
+        else if (hasCategory && hasStatus)
+        {
+            return CacheKeys.ExpensesByCompanyCategoryAndStatus(
+                companyId, query.ExpenseCategoryId!.Value, query.Status!,
+                query.Page, query.PageSize, sortBy, query.IsDescending);
+        }
+        else if (hasCategory && hasUser)
+        {
+            return CacheKeys.ExpensesByCompanyCategoryAndUser(
+                companyId, query.ExpenseCategoryId!.Value, query.UserId!.Value,
+                query.Page, query.PageSize, sortBy, query.IsDescending);
+        }
+        else if (hasStatus && hasUser)
+        {
+            return CacheKeys.ExpensesByCompanyStatusAndUser(
+                companyId, query.Status!, query.UserId!.Value,
+                query.Page, query.PageSize, sortBy, query.IsDescending);
+        }
+        else if (hasCategory)
         {
             return CacheKeys.ExpensesByCompanyAndCategory(
-                companyId, query.ExpenseCategoryId.Value, query.Page, query.PageSize,
-                query.SortBy ?? "createdat", query.IsDescending);
+                companyId, query.ExpenseCategoryId!.Value,
+                query.Page, query.PageSize, sortBy, query.IsDescending);
         }
-        else if (!string.IsNullOrEmpty(query.Status))
+        else if (hasStatus)
         {
             return CacheKeys.ExpensesByCompanyAndStatus(
-                companyId, query.Status, query.Page, query.PageSize,
-                query.SortBy ?? "createdat", query.IsDescending);
+                companyId, query.Status!,
+                query.Page, query.PageSize, sortBy, query.IsDescending);
         }
-        else
+        else if (hasUser)
         {
-            return CacheKeys.ExpensesByCompany(
-                companyId, query.Page, query.PageSize,
-                query.SortBy ?? "createdat", query.IsDescending);
+            return CacheKeys.ExpensesByCompanyAndUser(
+                companyId, query.UserId!.Value,
+                query.Page, query.PageSize, sortBy, query.IsDescending);
         }
+
+        // Default to company-only cache
+        return CacheKeys.ExpensesByCompany(
+            companyId, query.Page, query.PageSize, sortBy, query.IsDescending);
     }
+
+
 
     private string GetCompanyGroupKey(Guid companyId) => $"company:{companyId}";
 

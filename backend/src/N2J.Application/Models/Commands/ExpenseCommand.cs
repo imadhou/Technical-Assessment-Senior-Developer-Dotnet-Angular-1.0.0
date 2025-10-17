@@ -19,6 +19,10 @@ namespace N2J.Application.Models.Commands
         /// </summary>
         public decimal Amount { get; set; }
         /// <summary>
+        /// Currency of the expense (e.g., USD, EUR).
+        /// </summary>
+        public string Currency { get; set; } = "EUR";
+        /// <summary>
         /// Expense category identifier.
         /// </summary>
         public Guid ExpenseCategoryId { get; set; }

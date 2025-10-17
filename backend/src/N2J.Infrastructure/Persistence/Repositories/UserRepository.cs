@@ -27,5 +27,13 @@ namespace N2J.Infrastructure.Persistence.Repositories
         {
             return await _dbSet.AnyAsync(u => u.Email == email);
         }
+
+        public async Task<User?> GetFullByIdAsync(Guid id)
+        {
+            return await _dbSet
+                .Include(u => u.Role)
+                .Include(u => u.Company)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }   
     }
 }

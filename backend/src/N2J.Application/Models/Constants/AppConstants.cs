@@ -16,7 +16,7 @@ namespace N2J.Application.Models.Constants
         public const string ExpenseStatusApproved = "Approved";
         public const string ExpenseStatusRejected = "Rejected";
 
-        public static readonly Guid DefaultCompanyId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        public static readonly string DefaultCompanyName = "N2J";
 
     }
 }

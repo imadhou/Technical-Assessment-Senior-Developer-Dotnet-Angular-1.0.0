@@ -1,0 +1,122 @@
+<div class="sign-up-container">
+  <div class="cards-wrapper">
+    <!-- Form Card -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Create Account</h2>
+        <p>Join Expense Manager today</p>
+      </div>
+
+      <div class="card-body">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="form">
+          <!-- Name Fields -->
+          <div class="form-row">
+            <!-- First Name -->
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                formControlName="firstName"
+                placeholder="First name"
+                [class.error]="firstName?.invalid && firstName?.touched"
+                autocomplete="given-name">
+              <div class="error-message" *ngIf="firstName?.invalid && firstName?.touched">
+                <span *ngIf="firstName?.errors?.['required']">First name is required</span>
+                <span *ngIf="firstName?.errors?.['minlength']">
+                  First name must be at least 2 characters
+                </span>
+              </div>
+            </div>
+
+            <!-- Last Name -->
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                formControlName="lastName"
+                placeholder="Last name"
+                [class.error]="lastName?.invalid && lastName?.touched"
+                autocomplete="family-name">
+              <div class="error-message" *ngIf="lastName?.invalid && lastName?.touched">
+                <span *ngIf="lastName?.errors?.['required']">Last name is required</span>
+                <span *ngIf="lastName?.errors?.['minlength']">
+                  Last name must be at least 2 characters
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              [class.error]="email?.invalid && email?.touched"
+              autocomplete="email">
+            <div class="error-message" *ngIf="email?.invalid && email?.touched">
+              <span *ngIf="email?.errors?.['required']">Email is required</span>
+              <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="Create password"
+              [class.error]="password?.invalid && password?.touched"
+              autocomplete="new-password">
+            <div class="error-message" *ngIf="password?.invalid && password?.touched">
+              <span *ngIf="password?.errors?.['required']">Password is required</span>
+              <span *ngIf="password?.errors?.['minlength']">
+                Password must be at least 6 characters
+              </span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            [disabled]="loading() || registerForm.invalid">
+            <span *ngIf="loading()">Creating Account...</span>
+            <span *ngIf="!loading()">Create Account</span>
+          </button>
+        </form>
+
+        <div class="auth-links">
+          <p>
+            Already have an account?
+            <a routerLink="/auth/sign-in" class="link">Sign in here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Card - Shows for both single errors and error lists -->
+    <div class="error-card" *ngIf="errorMessage() || errorList().length > 0">
+      <div class="error-card-header">
+        <h3>Please check the following:</h3>
+      </div>
+      <div class="error-card-body">
+        <!-- Single Error Message -->
+        <div *ngIf="errorMessage()" class="error-general-message">
+          {{ errorMessage() }}
+        </div>
+
+        <!-- Error List -->
+        <ul *ngIf="errorList().length > 0" class="error-list">
+          <li *ngFor="let err of errorList()">{{ err }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

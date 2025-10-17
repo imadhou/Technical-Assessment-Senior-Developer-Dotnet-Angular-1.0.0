@@ -1,0 +1,206 @@
+<div class="expense-detail-modal">
+  <!-- Header -->
+  <div class="modal-inner-header">
+    <div class="expense-title-section">
+      <h2>{{ expense.description || 'No Description' }}</h2>
+      <span [class]="getStatusBadgeClass(expense.status || '')" class="status-badge-large">
+        {{ expense.status || 'Pending' }}
+      </span>
+    </div>
+    <div class="amount-display-large">
+      {{ formatCurrency(expense.amount || 0) }}
+    </div>
+  </div>
+
+  <!-- Error Messages -->
+  <div *ngIf="errorMessage() || errorList().length > 0" class="error-container">
+    <div *ngIf="errorMessage()" class="error-message">
+      {{ errorMessage() }}
+    </div>
+    <ul *ngIf="errorList().length > 0" class="error-list">
+      <li *ngFor="let error of errorList()">{{ error }}</li>
+    </ul>
+  </div>
+
+  <!-- Main Content - Scrollable Area -->
+  <div class="modal-content-scrollable">
+    <!-- Edit Form -->
+    <form *ngIf="isEditMode()" (ngSubmit)="saveExpense()" class="edit-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input
+            type="text"
+            id="description"
+            [(ngModel)]="editForm().description"
+            name="description"
+            placeholder="Enter expense description">
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Amount</label>
+          <input
+            type="number"
+            id="amount"
+            [(ngModel)]="editForm().amount"
+            name="amount"
+            step="0.01"
+            min="0"
+            placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input
+            type="date"
+            id="date"
+            [(ngModel)]="editForm().date"
+            name="date">
+        </div>
+
+        <div class="form-group">
+          <label for="expenseCategoryId">Category ID</label>
+          <input
+            type="text"
+            id="expenseCategoryId"
+            [(ngModel)]="editForm().expenseCategoryId"
+            name="expenseCategoryId"
+            placeholder="Category ID">
+        </div>
+
+        <!-- Receipt Upload -->
+        <div class="form-group full-width">
+          <label for="receipt">Receipt</label>
+          <div class="file-upload-section">
+            <div *ngIf="expense.receiptUrl" class="existing-receipt">
+              <span>Current: {{ expense.receiptFileName }}</span>
+              <button type="button" class="btn-danger btn-small" (click)="removeReceipt()" [disabled]="loading()">
+                Remove
+              </button>
+            </div>
+            <input
+              type="file"
+              id="receipt"
+              (change)="onFileSelected($event)"
+              accept=".jpg,.jpeg,.png,.pdf"
+              class="file-input">
+            <label for="receipt" class="file-input-label">
+              {{ selectedFile ? selectedFile.name : 'Choose new receipt file' }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- View Mode -->
+    <div *ngIf="!isEditMode()" class="details-grid-modal">
+      <!-- Your existing view mode content... -->
+      <div class="detail-section">
+        <h3>Expense Information</h3>
+        <div class="detail-list">
+          <div class="detail-item">
+            <span class="detail-label">Description</span>
+            <span class="detail-value">{{ expense.description || 'No description provided' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Amount</span>
+            <span class="detail-value amount">{{ formatCurrency(expense.amount || 0) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date Incurred</span>
+            <span class="detail-value">{{ formatDate(expense.date || '') }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Category</span>
+            <span class="detail-value category-tag">
+              {{ expense.expenseCategory.name || 'Uncategorized' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submitted By -->
+      <div class="detail-section">
+        <h3>Submitted By</h3>
+        <div class="user-info">
+          <div class="user-avatar">
+            {{ getUserInitials() }}
+          </div>
+          <div class="user-details">
+            <strong>{{ expense.user.firstName }} {{ expense.user.lastName }}</strong>
+            <span class="user-email">{{ expense.user.email }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">User ID</span>
+          <span class="detail-value monospace">{{ expense.userId }}</span>
+        </div>
+      </div>
+
+      <!-- Receipt Information -->
+      <div *ngIf="expense.receiptUrl" class="detail-section">
+        <h3>Receipt</h3>
+        <div class="detail-list">
+          <div class="detail-item">
+            <span class="detail-label">File Name</span>
+            <span class="detail-value">{{ expense.receiptFileName || 'Receipt' }}</span>
+          </div>
+          <div *ngIf="expense.receiptFileSize" class="detail-item">
+            <span class="detail-label">File Size</span>
+            <span class="detail-value">{{ getFileSize(expense.receiptFileSize || 0) }}</span>
+          </div>
+          <div *ngIf="expense.receiptUploadedAt" class="detail-item">
+            <span class="detail-label">Uploaded</span>
+            <span class="detail-value">{{ formatDateTime(expense.receiptUploadedAt || '') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Information -->
+      <div class="detail-section">
+        <h3>System Information</h3>
+        <div class="detail-list">
+          <div class="detail-item">
+            <span class="detail-label">Expense ID</span>
+            <span class="detail-value monospace">{{ expense.id }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">{{ formatDateTime(expense.createdAt || '') }}</span>
+          </div>
+          <div *ngIf="expense.updatedAt" class="detail-item">
+            <span class="detail-label">Last Updated</span>
+            <span class="detail-value">{{ formatDateTime(expense.updatedAt || '') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons - Fixed at Bottom -->
+  <div class="modal-actions">
+    <!-- Edit Mode Actions -->
+    <div *ngIf="isEditMode()" class="edit-actions">
+      <button type="button" class="btn-secondary" (click)="cancelEdit()" [disabled]="loading()">
+        Cancel
+      </button>
+      <button type="submit" class="btn-primary" (click)="saveExpense()" [disabled]="loading()">
+        <span *ngIf="loading()">Saving...</span>
+        <span *ngIf="!loading()">Save Changes</span>
+      </button>
+    </div>
+
+    <!-- View Mode Actions -->
+    <div *ngIf="!isEditMode()" class="view-actions">
+      <button class="btn-secondary" (click)="onClose()">
+        Close
+      </button>
+      <button class="btn-primary" (click)="enterEditMode()">
+        Edit Expense
+      </button>
+      <button *ngIf="expense.receiptUrl" class="btn-primary" (click)="downloadReceipt()">
+        Download Receipt
+      </button>
+    </div>
+  </div>
+</div>

@@ -9,10 +9,10 @@ public class Expense
     public Guid ExpenseCategoryId { get; set; }
     public Guid UserId { get; set; }
     public DateTime Date { get; set; }
+    public string Currency { get; set; } = "EUR";
     public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
-
     public Guid CreatedBy { get; set; }
     public Guid? UpdatedBy { get; set; }
 

@@ -25,6 +25,12 @@ public class ExpenseCommandValidator : AbstractValidator<ExpenseCommand>
             .PrecisionScale(18, 2, false).WithMessage("Amount cannot have more than 2 decimal places")
             .Must(BeAReasonableAmount).WithMessage("Amount appears to be unreasonable for an expense");
 
+        // Currency validation
+        RuleFor(x => x.Currency)
+            .NotEmpty().WithMessage("Currency is required")
+            .Length(3).WithMessage("Currency must be a 3-letter ISO code")
+            .Matches(@"^[A-Z]{3}$").WithMessage("Currency must be uppercase 3-letter ISO code");
+
         // ExpenseCategoryId validation
         RuleFor(x => x.ExpenseCategoryId)
             .NotEmpty().WithMessage("ExpenseCategoryId is required")

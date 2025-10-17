@@ -1,11 +1,150 @@
-<div class="min-h-screen bg-gray-50">
-  <header class="bg-white shadow">
-    <div class="container mx-auto px-4 py-6">
-      <h1 class="text-3xl font-bold text-gray-800">Enterprise Expense Manager</h1>
+<div class="h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 flex-shrink-0">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo and Brand -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+            <span class="text-white font-bold text-lg">💰</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-800">Enterprise Expense Manager</h1>
+            <p class="text-sm text-gray-500 hidden sm:block">Track and manage company expenses</p>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center space-x-1">
+          <a routerLink="/expenses"
+             class="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100">
+            Expenses
+          </a>
+        </nav>
+
+        <!-- User Menu / Auth Buttons -->
+        <div class="flex items-center space-x-3">
+          <!-- Theme Toggle (Optional) -->
+          <button class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+          </button>
+
+          <!-- User Avatar / Auth -->
+          <div class="relative" *ngIf="isAuthenticated(); else authButtons">
+            <button (click)="toggleUserMenu()"
+                    class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+              <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-semibold">U</span>
+              </div>
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+
+            <!-- User Dropdown Menu -->
+            <div *ngIf="userMenuOpen"
+                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+              <a routerLink="/profile"
+                 class="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                Profile
+              </a>
+              <div class="border-t border-gray-200 my-1"></div>
+              <button (click)="logout()"
+                      class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200">
+                Sign Out
+              </button>
+            </div>
+          </div>
+
+          <ng-template #authButtons>
+            <div class="flex items-center space-x-2">
+              <a routerLink="/auth/sign-in"
+                 class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100">
+                Sign In
+              </a>
+              <a routerLink="/auth/sign-up"
+                 class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg transition-all duration-200 hover:from-blue-600 hover:to-purple-700 shadow-sm">
+                Sign Up
+              </a>
+            </div>
+          </ng-template>
+
+          <!-- Mobile Menu Button -->
+          <button (click)="toggleMobileMenu()"
+                  class="md:hidden p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <div *ngIf="mobileMenuOpen" class="md:hidden border-t border-gray-200 py-4">
+        <nav class="flex flex-col space-y-2">
+          <a routerLink="/expenses"
+             class="px-4 py-3 text-gray-600 hover:text-gray-900 font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100"
+             (click)="closeMobileMenu()">
+            Expenses
+          </a>
+
+          <div *ngIf="!isAuthenticated()" class="pt-4 border-t border-gray-200">
+            <a routerLink="/auth/sign-in"
+               class="block px-4 py-3 text-gray-600 hover:text-gray-900 font-medium rounded-lg transition-colors duration-200 hover:bg-gray-100 mb-2"
+               (click)="closeMobileMenu()">
+              Sign In
+            </a>
+            <a routerLink="/auth/sign-up"
+               class="block px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg transition-all duration-200 text-center"
+               (click)="closeMobileMenu()">
+              Sign Up
+            </a>
+          </div>
+        </nav>
+      </div>
     </div>
   </header>
 
-  <main class="container mx-auto px-4 py-6">
-    <router-outlet></router-outlet>
+  <!-- Main Content Area with Internal Scroll -->
+  <main class="flex-1 overflow-auto bg-gray-50">
+    <div class="container mx-auto px-4 py-6 min-h-full">
+      <router-outlet></router-outlet>
+    </div>
   </main>
+
+  <!-- Small Footer -->
+  <footer class="bg-white border-t border-gray-200 flex-shrink-0">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+        <!-- Copyright and Brand -->
+        <div class="text-center md:text-left">
+          <p class="text-sm text-gray-600">
+            &copy; {{ currentYear }} Enterprise Expense Manager. All rights reserved.
+          </p>
+        </div>
+
+        <!-- Links -->
+        <div class="flex flex-wrap justify-center md:justify-end space-x-4 text-sm">
+          <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            Privacy Policy
+          </a>
+          <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            Terms of Service
+          </a>
+          <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            Support
+          </a>
+        </div>
+
+        <!-- Version Info -->
+        <div class="text-center md:text-right">
+          <p class="text-xs text-gray-400">
+            v1.0.0
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
 </div>

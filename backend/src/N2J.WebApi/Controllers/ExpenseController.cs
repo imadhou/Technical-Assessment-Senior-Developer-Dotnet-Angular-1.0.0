@@ -81,7 +81,7 @@ public class ExpenseController : ControllerBase
     [HttpPut("{id:guid}")]
     [AuthorizeRole(AppConstants.ManagerRole, AppConstants.EmployeeRole)]
     [ProducesResponseType(typeof(ExpenseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -122,7 +122,7 @@ public class ExpenseController : ControllerBase
     [HttpPatch("{id:guid}/status")]
     [AuthorizeRole(AppConstants.ManagerRole)]
     [ProducesResponseType(typeof(ExpenseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -190,7 +190,7 @@ public class ExpenseController : ControllerBase
     [HttpGet]
     [AuthorizeRole(AppConstants.ManagerRole, AppConstants.EmployeeRole)]
     [ProducesResponseType(typeof(ExpenseCollectionDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -208,6 +208,11 @@ public class ExpenseController : ControllerBase
         }
 
         var contextUser = User.ToUserContext();
+        var isEmployee = contextUser.Role == AppConstants.EmployeeRole;
+        if (isEmployee)
+        {
+            query.UserId = contextUser.UserId;
+        }
         var expenses = await _expenseService.GetAllWithCountAsync(query, contextUser.CompanyId);
 
         var links = GenerateCollectionLinks(query);

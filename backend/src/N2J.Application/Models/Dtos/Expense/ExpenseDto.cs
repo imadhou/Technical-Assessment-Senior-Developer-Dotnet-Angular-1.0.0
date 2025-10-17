@@ -17,6 +17,11 @@ public class ExpenseDto
     /// Amount of the expense.
     /// </summary>
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Currency of the expense (e.g., USD, EUR).
+    /// </summary>
+    public string Currency { get; set; } = String.Empty; 
     /// <summary>
     /// Expense category identifier.
     /// </summary>

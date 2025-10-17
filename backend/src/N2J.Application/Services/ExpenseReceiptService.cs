@@ -64,7 +64,7 @@ namespace N2J.Application.Services
         public async Task<Stream> DownloadReceiptAsync(Guid expenseId, Guid userId)
         {
             var expense = await _expenseRepository.GetByIdAsync(expenseId);
-            if (expense == null || expense.UserId != userId || string.IsNullOrEmpty(expense.ReceiptUrl))
+            if (expense == null || string.IsNullOrEmpty(expense.ReceiptUrl))
             {
                 throw new FileNotFoundException("Receipt not found");
             }
@@ -77,7 +77,7 @@ namespace N2J.Application.Services
         public async Task<bool> DeleteReceiptAsync(Guid expenseId, Guid userId)
         {
             var expense = await _expenseRepository.GetByIdAsync(expenseId);
-            if (expense == null || expense.UserId != userId || string.IsNullOrEmpty(expense.ReceiptUrl))
+            if (expense == null || string.IsNullOrEmpty(expense.ReceiptUrl))
             {
                 return false;
             }

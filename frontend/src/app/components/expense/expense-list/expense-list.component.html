@@ -1,0 +1,234 @@
+<!-- expense-list.component.html -->
+<div class="expense-list-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Expense Management</h1>
+    <p>Manage and track your expenses</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage()" class="error-message">
+    {{ errorMessage() }}
+  </div>
+
+  <!-- Filters Card -->
+  <div class="filters-card">
+    <div class="filters-header">
+      <h3>Filters</h3>
+      <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+        Clear All
+      </button>
+    </div>
+
+    <div class="filters-grid">
+      <!-- Description Filter -->
+      <div class="filter-group">
+        <label for="description">Description</label>
+        <input
+          type="text"
+          id="description"
+          [value]="filters().description"
+          (input)="updateFilter('description', $event)"
+          placeholder="Search descriptions...">
+      </div>
+
+      <!-- Date Range Filters -->
+      <div class="filter-group">
+        <label for="fromDate">From Date</label>
+        <input
+          type="date"
+          id="fromDate"
+          [value]="filters().fromDate"
+          (input)="updateFilter('fromDate', $event)">
+      </div>
+
+      <div class="filter-group">
+        <label for="toDate">To Date</label>
+        <input
+          type="date"
+          id="toDate"
+          [value]="filters().toDate"
+          (input)="updateFilter('toDate', $event)">
+      </div>
+
+      <!-- Amount Range Filters -->
+      <div class="filter-group">
+        <label for="minAmount">Min Amount</label>
+        <input
+          type="number"
+          id="minAmount"
+          [value]="filters().minAmount"
+          (input)="updateFilter('minAmount', $event)"
+          placeholder="0.00"
+          step="0.01"
+          min="0">
+      </div>
+
+      <div class="filter-group">
+        <label for="maxAmount">Max Amount</label>
+        <input
+          type="number"
+          id="maxAmount"
+          [value]="filters().maxAmount"
+          (input)="updateFilter('maxAmount', $event)"
+          placeholder="0.00"
+          step="0.01"
+          min="0">
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label for="status">Status</label>
+        <select
+          id="status"
+          [value]="filters().status"
+          (change)="updateFilter('status', $event)">
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results and Controls -->
+  <div class="controls-row">
+    <div class="results-count">
+      Showing {{ expenses().length }} of {{ pagination().totalCount }} expenses
+    </div>
+
+    <div class="page-size-control">
+      <label for="pageSize">Items per page:</label>
+      <select
+        id="pageSize"
+        [value]="pagination().pageSize"
+        (change)="onPageSizeChange(+$any($event.target).value)">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Expenses Table -->
+  <div class="table-container">
+    <table class="expenses-table">
+      <thead>
+        <tr>
+          <th (click)="onSort('date')" class="sortable">
+            Date {{ getSortIcon('date') }}
+          </th>
+          <th (click)="onSort('description')" class="sortable">
+            Description {{ getSortIcon('description') }}
+          </th>
+          <th (click)="onSort('amount')" class="sortable">
+            Amount {{ getSortIcon('amount') }}
+          </th>
+          <th (click)="onSort('category')" class="sortable">
+            Category {{ getSortIcon('category') }}
+          </th>
+          <th (click)="onSort('status')" class="sortable">
+            Status {{ getSortIcon('status') }}
+          </th>
+          <th (click)="onSort('user')" class="sortable">
+            User {{ getSortIcon('user') }}
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Loading State -->
+        <tr *ngIf="loading()">
+          <td colspan="7" class="loading-cell">
+            <div class="loading-spinner"></div>
+            Loading expenses...
+          </td>
+        </tr>
+
+        <!-- No Results -->
+        <tr *ngIf="!loading() && expenses().length === 0">
+          <td colspan="7" class="no-results">
+            No expenses found matching your criteria.
+          </td>
+        </tr>
+
+        <!-- Expense Rows -->
+        <tr *ngFor="let expense of sortedExpenses()" class="expense-row">
+          <td class="date-cell">{{ formatDate(expense.date) }}</td>
+          <td class="description-cell">
+            <div class="description">{{ expense.description || 'No description' }}</div>
+            <div *ngIf="expense.receiptFileName" class="receipt-indicator">
+              📎 Receipt attached
+            </div>
+          </td>
+          <td class="amount-cell">{{ formatCurrency(expense.amount, expense.currency) }}</td>
+          <td class="category-cell">
+            {{ expense.expenseCategory.name || 'Uncategorized' }}
+          </td>
+          <td class="status-cell">
+            <span [class]="getStatusBadgeClass(expense.status || '')">
+              {{ expense.status || 'Pending' }}
+            </span>
+          </td>
+          <td class="user-cell">
+            {{ expense.user.firstName }} {{ expense.user.lastName }}
+          </td>
+          <td class="actions-cell">
+            <button class="btn-action view-btn" title="View Details" (click)="openExpenseDetail(expense)">
+              👁️
+            </button>
+            <button class="btn-action edit-btn" title="Edit" (click)="openEditExpense(expense)">
+              ✏️
+            </button>
+            <button class="btn-action delete-btn" title="Delete">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="pagination().totalPages > 1" class="pagination">
+    <button
+      class="pagination-btn"
+      [disabled]="pagination().currentPage === 1"
+      (click)="onPageChange(pagination().currentPage - 1)">
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      <span class="page-info">
+        Page {{ pagination().currentPage }} of {{ pagination().totalPages }}
+      </span>
+    </div>
+
+    <button
+      class="pagination-btn"
+      [disabled]="pagination().currentPage === pagination().totalPages"
+      (click)="onPageChange(pagination().currentPage + 1)">
+      Next
+    </button>
+  </div>
+</div>
+
+
+  <!-- Expense Detail Modal -->
+  <div *ngIf="showDetailModal() && selectedExpense()" class="modal-overlay" (click)="closeExpenseDetail()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Expense Details</h2>
+        <button class="close-btn" (click)="closeExpenseDetail()">×</button>
+      </div>
+      <div class="modal-body">
+       <app-expense-detail
+        [expense]="selectedExpense()!"
+        [editMode]="editingExpense"
+        (close)="closeExpenseDetail()"
+        (expenseUpdated)="onExpenseUpdated($event)">
+      </app-expense-detail>
+      </div>
+    </div>
+  </div>

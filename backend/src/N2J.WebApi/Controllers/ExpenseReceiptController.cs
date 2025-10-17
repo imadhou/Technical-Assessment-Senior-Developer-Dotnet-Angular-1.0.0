@@ -62,14 +62,14 @@ public class ExpenseReceiptsController : ControllerBase
 
             return File(stream, "application/octet-stream", $"receipt-{expenseId}");
         }
-        catch (FileNotFoundException)
+        catch (FileNotFoundException ex)
         {
-            _logger.LogWarning("Receipt not found for expense {ExpenseId}", expenseId);
+            _logger.LogWarning(ex, "Receipt not found for expense {ExpenseId}", expenseId);
             return NotFound(new { message = "Receipt not found" });
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
-            _logger.LogWarning("Unauthorized access while downloading receipt for expense {ExpenseId}", expenseId);
+            _logger.LogWarning(ex, "Unauthorized access while downloading receipt for expense {ExpenseId}", expenseId);
             return NotFound(new { message = "Receipt not found" });
         }
     }
